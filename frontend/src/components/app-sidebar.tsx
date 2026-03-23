@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
@@ -64,6 +65,13 @@ const settingsItems = [
 ];
 
 export function AppSidebar() {
+  const { setOpen, setOpenMobile } = useSidebar();
+
+  const handleNavigate = () => {
+    setOpen(false);
+    setOpenMobile(false);
+  };
+
   return (
     <Sidebar className="bg-white">
       <SidebarHeader className="border-b pb-4">
@@ -86,7 +94,11 @@ export function AppSidebar() {
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url} className="flex items-center gap-3">
+                    <a
+                      href={item.url}
+                      className="flex items-center gap-3"
+                      onClick={handleNavigate}
+                    >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </a>
@@ -104,7 +116,11 @@ export function AppSidebar() {
               {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url} className="flex items-center gap-3">
+                    <a
+                      href={item.url}
+                      className="flex items-center gap-3"
+                      onClick={handleNavigate}
+                    >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </a>
@@ -123,6 +139,7 @@ export function AppSidebar() {
               <a
                 href="/perfil"
                 className="flex items-center gap-3 w-full justify-start"
+                onClick={handleNavigate}
               >
                 <User className="h-4 w-4" />
                 <span>Perfil</span>

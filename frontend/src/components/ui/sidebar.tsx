@@ -161,7 +161,8 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset";
   collapsible?: "offcanvas" | "icon" | "none";
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, state, open, setOpen, openMobile, setOpenMobile } =
+    useSidebar();
 
   if (collapsible === "none") {
     return (
@@ -197,6 +198,27 @@ function Sidebar({
           <SheetHeader className="sr-only">
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+          </SheetHeader>
+          <div className="flex h-full w-full flex-col">{children}</div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop offcanvas behaves like an overlay layer without affecting layout flow.
+  if (collapsible === "offcanvas") {
+    return (
+      <Sheet open={open} onOpenChange={setOpen} {...props}>
+        <SheetContent
+          dir={dir}
+          data-sidebar="sidebar"
+          data-slot="sidebar"
+          className="w-[var(--sidebar-width)] bg-sidebar p-0 text-sidebar-foreground"
+          side={side}
+        >
+          <SheetHeader className="sr-only">
+            <SheetTitle>Sidebar</SheetTitle>
+            <SheetDescription>Displays the desktop sidebar.</SheetDescription>
           </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
