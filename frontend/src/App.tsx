@@ -1,12 +1,12 @@
-import React from "react";
+// src/App.tsx
+import Landing from "./pages/Landing";
 
-const Landing = () => {
+function App() {
   return (
     <div>
-      <h1>Welcome to the App</h1>
-      <p>This is the landing page.</p>
+      <Landing />
     </div>
   );
-};
+}
 
-export default Landing;
+export default App;
