@@ -10,7 +10,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Home, Settings, LogOut, User } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  UserCheck,
+  Car,
+  History as HistoryIcon,
+  Mail,
+  Settings,
+  LogOut,
+  User,
+} from "lucide-react";
 
 const navigationItems = [
   {
@@ -19,15 +29,35 @@ const navigationItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Home",
-    url: "/",
-    icon: Home,
+    title: "Usuarios",
+    url: "/users",
+    icon: Users,
+  },
+  {
+    title: "Gestion de usuarios",
+    url: "/users-management",
+    icon: UserCheck,
+  },
+  {
+    title: "Gestion de vehiculos",
+    url: "/vehicle-management",
+    icon: Car,
+  },
+  {
+    title: "Historial",
+    url: "/history",
+    icon: HistoryIcon,
+  },
+  {
+    title: "Contacto",
+    url: "/contact-us",
+    icon: Mail,
   },
 ];
 
 const settingsItems = [
   {
-    title: "Settings",
+    title: "Configuracion",
     url: "/settings",
     icon: Settings,
   },
@@ -50,7 +80,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Navegacion</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => (
@@ -68,7 +98,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
+          <SidebarGroupLabel>Ajustes</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.map((item) => (
@@ -90,17 +120,20 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <button className="flex items-center gap-3 w-full justify-start">
+              <a
+                href="/perfil"
+                className="flex items-center gap-3 w-full justify-start"
+              >
                 <User className="h-4 w-4" />
-                <span>Profile</span>
-              </button>
+                <span>Perfil</span>
+              </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <button className="flex items-center gap-3 w-full justify-start text-red-600 hover:text-red-700">
                 <LogOut className="h-4 w-4" />
-                <span>Logout</span>
+                <span>Cerrar sesion</span>
               </button>
             </SidebarMenuButton>
           </SidebarMenuItem>
