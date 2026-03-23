@@ -1,4 +1,5 @@
 import InfoCard from "../components/InfoCard";
+import FormLanding from "../components/FormLanding";
 import { Mail, MapPin } from "lucide-react";
 
 const Landing = () => {
@@ -27,9 +28,7 @@ const Landing = () => {
         <h1 className="text-2 font-bold  text-3xl my-6 w-full mx-auto">
           Registra tu vehículo
         </h1>
-        <p className="text-color-gray">
-          Completa el formulario para registrar tu vehículo
-        </p>
+        <FormLanding />
         <h1 className="text-2 font-bold  text-3xl my-6 w-full mx-auto">
           Información de Contacto
         </h1>
