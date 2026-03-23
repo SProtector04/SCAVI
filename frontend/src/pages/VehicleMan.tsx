@@ -8,7 +8,7 @@ const VehicleMan = () => {
           Gestion de vehiculos
         </h1>
         <p className="mt-2 text-slate-600">
-          Seccion para registrar, actualizar y consultar vehiculos autorizados.
+          Control de registro y mantenimiento de vehiculos autorizados.
         </p>
       </div>
     </Layout>

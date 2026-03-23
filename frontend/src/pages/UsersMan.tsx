@@ -8,7 +8,7 @@ const UsersMan = () => {
           Gestion de usuarios
         </h1>
         <p className="mt-2 text-slate-600">
-          Administra altas, bajas y cambios de usuarios del sistema.
+          Administracion de altas, cambios y estado de cuentas.
         </p>
       </div>
     </Layout>
