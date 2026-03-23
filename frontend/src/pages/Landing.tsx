@@ -50,8 +50,8 @@ const Landing = () => {
             />
             <InfoCard
               icon={<Phone size={32} />}
-              title="Numero de Contacto"
-              value="0000-0000 (Proximamente)"
+              title="Numero de Contacto (Proximamente)"
+              value="0000-0000"
             />
           </div>
         </div>
