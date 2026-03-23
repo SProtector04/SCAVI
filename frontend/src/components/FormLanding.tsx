@@ -10,8 +10,11 @@ const FormLanding = () => {
   };
 
   return (
-    <section className="mx-auto w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-md md:p-8">
-      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+    <section className="mx-auto w-full max-w-4xl rounded-2xl border border-slate-200 bg-white p-6 shadow-md md:p-8">
+      <form
+        className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6"
+        onSubmit={handleSubmit}
+      >
         {/* Placa del Vehículo */}
         <div>
           <label
@@ -96,7 +99,23 @@ const FormLanding = () => {
         </div>
 
         {/* Botón de Envío */}
-        <div className="pt-2">
+        <div className="md:col-span-2">
+          <label
+            className="mb-2 block text-left text-sm font-bold text-slate-800"
+            htmlFor="notes"
+          >
+            Observaciones
+          </label>
+          <textarea
+            id="notes"
+            name="notes"
+            rows={4}
+            placeholder="Información adicional (opcional)"
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-green-700 focus:ring-1 focus:ring-green-700"
+          />
+        </div>
+
+        <div className="pt-2 md:col-span-2">
           <button
             type="submit"
             className="w-full rounded-xl bg-[#1a630a] py-4 font-bold text-white shadow-lg transition hover:bg-[#145208] active:scale-[0.98]"
@@ -106,7 +125,7 @@ const FormLanding = () => {
         </div>
 
         {sent && (
-          <div className="mt-2 rounded-xl border border-green-200 bg-green-50 p-4 text-center text-sm font-bold text-green-800">
+          <div className="mt-2 rounded-xl border border-green-200 bg-green-50 p-4 text-center text-sm font-bold text-green-800 md:col-span-2">
             ✓ ¡Solicitud enviada con éxito!
           </div>
         )}
