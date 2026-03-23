@@ -10,7 +10,7 @@ const Footer = () => {
         </span>
 
         {/* Texto de derechos o info adicional */}
-        <p className="text-slate-500 text-sm font-medium">
+        <p className="text-slate-500 text-sm font-medium mx-4">
           © 2026 Universidad Tecnológica La Salle. Todos los derechos
           reservados.
         </p>

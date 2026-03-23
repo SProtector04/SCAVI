@@ -10,7 +10,7 @@ const Landing = () => {
       </header>
       <div className="min-h-screen bg-[#f7f7f7] p-4 text-center">
         <div className="mx-auto w-full max-w-5xl">
-          <h2 className="mx-auto my-6 w-2/3 rounded-full border border-green-800 bg-white p-2 text-center shadow-sm text-green-900 font-small">
+          <h2 className="mx-auto my-6 w-full rounded-full border border-green-800 bg-white p-2 text-center shadow-sm text-green-900 font-small">
             Universidad Tecnológica La Salle
           </h2>
           <h1 className="text-2 font-bold  text-3xl my-6 w-full mx-auto">
