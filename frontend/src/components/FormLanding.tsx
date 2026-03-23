@@ -99,21 +99,6 @@ const FormLanding = () => {
         </div>
 
         {/* Botón de Envío */}
-        <div className="md:col-span-2">
-          <label
-            className="mb-2 block text-left text-sm font-bold text-slate-800"
-            htmlFor="notes"
-          >
-            Observaciones
-          </label>
-          <textarea
-            id="notes"
-            name="notes"
-            rows={4}
-            placeholder="Información adicional (opcional)"
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-green-700 focus:ring-1 focus:ring-green-700"
-          />
-        </div>
 
         <div className="pt-2 md:col-span-2">
           <button
