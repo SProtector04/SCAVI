@@ -36,7 +36,7 @@ const Landing = () => {
           <h1 className="text-2 font-bold  text-3xl my-6 w-full mx-auto">
             Información de Contacto
           </h1>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 align-items-center justify-items-center">
+          <div className="align-items-center justify-items-center">
             <InfoCard
               icon={<Mail size={32} />}
               title="Correo (Proximamente)"

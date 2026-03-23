@@ -9,7 +9,7 @@ interface InfoCardProps {
 
 const InfoCard: React.FC<InfoCardProps> = ({ icon, title, value }) => {
   return (
-    <div className="bg-white p-10 rounded-2xl shadow-md flex flex-col items-center justify-center border border-slate-100 max-w-sm w-full">
+    <div className="bg-white p-10 rounded-2xl shadow-md flex flex-col items-center justify-center border border-slate-100 max-w-sm w-full m-2">
       {/* Contenedor del Icono */}
       <div className="bg-green-50 p-4 rounded-xl mb-5 flex items-center justify-center w-16 h-16">
         {React.isValidElement(icon)
