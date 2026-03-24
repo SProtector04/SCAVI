@@ -76,12 +76,14 @@ export function AppSidebar() {
     <Sidebar className="bg-white">
       <SidebarHeader className="border-b pb-4">
         <div className="flex items-center gap-2 px-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-            PF
+          <div className=" flex h-8 w-8 items-center justify-center rounded-lg bg-green-800 text-primary-foreground font-bold">
+            <Car className="h-5 w-5 inline-block " />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold">ProWeb</span>
-            <span className="text-xs text-muted-foreground">ULSA Final</span>
+            <span className="text-sm font-semibold">SCAVI</span>
+            <span className="text-xs text-muted-foreground">
+              Team DigitalOne
+            </span>
           </div>
         </div>
       </SidebarHeader>
