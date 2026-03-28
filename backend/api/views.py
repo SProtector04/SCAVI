@@ -1,5 +1,4 @@
-from rest_framework import viewsets
-from rest_framework.decorators import api_view
+from rest_framework import viewsets, views, permissions, status
 from rest_framework.response import Response
 from .models import Usuario, AccessLog
 from .serializers import UsuarioSerializer, AccessLogSerializer
@@ -8,14 +7,19 @@ from .serializers import UsuarioSerializer, AccessLogSerializer
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
+    permission_classes = [permissions.AllowAny]
+class AccessLogViewSet(viewsets.ReadOnlyModelViewSet):
     
-class AccessLogViewSet(viewsets.ModelViewSet):
-    queryset = AccessLog.objects.all()
+    queryset = AccessLog.objects.all().order_by('-id') 
     serializer_class = AccessLogSerializer
+    permission_classes = [permissions.AllowAny]
     
-@api_view(['GET'])
-def test_endpoint(request):
-    return Response({
-        "message": "¡Hola desde el endpoint de prueba!",
-        "status": "success"
-    })
+class HealthCheckView(views.APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        return Response({
+            "message": "¡API funcionando correctamente!",
+            "status": "success",
+            "project": "ProWeb"
+        }, status=status.HTTP_200_OK)
