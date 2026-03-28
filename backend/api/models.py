@@ -6,6 +6,9 @@ class AccessLog(models.Model):
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"[{self.method}] {self.endpoint} - {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+
 class Usuario(models.Model):
     nombre = models.CharField(max_length=100)
     apellidos = models.CharField(max_length=100)
@@ -15,4 +18,3 @@ class Usuario(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellidos}"
-        return f"[{self.method}] {self.endpoint} - {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"

@@ -3,7 +3,7 @@ from .models import AccessLog
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        self.ignored_routes = ['/admin/', '/api/accesslogs/']
+        self.ignored_routes = ['/admin', '/api/access_logs']
 
     def __call__(self, request):
         response = self.get_response(request)
