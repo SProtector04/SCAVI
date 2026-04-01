@@ -89,6 +89,10 @@ The project board is managed on Trello:
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=SProtector04%2FProyecto-Final-ProWeb&amp;type=date&amp;logscale=&amp;legend=top-left">
- 
+<a href="https://www.star-history.com/?repos=SProtector04%2FProyecto-Final-ProWeb&type=date&logscale=&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=SProtector04/Proyecto-Final-ProWeb&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=SProtector04/Proyecto-Final-ProWeb&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=SProtector04/Proyecto-Final-ProWeb&type=date&legend=top-left" />
+ </picture>
 </a>
