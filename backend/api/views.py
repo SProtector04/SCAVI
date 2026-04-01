@@ -8,11 +8,14 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
     permission_classes = [permissions.AllowAny]
+    
+    
 class AccessLogViewSet(viewsets.ReadOnlyModelViewSet):
     
     queryset = AccessLog.objects.all().order_by('-id') 
     serializer_class = AccessLogSerializer
     permission_classes = [permissions.AllowAny]
+    
     
 class HealthCheckView(views.APIView):
     permission_classes = [permissions.AllowAny]
