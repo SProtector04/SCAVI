@@ -12,4 +12,4 @@ class AccessLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccessLog
         fields = '__all__'
-        read_only_fields = ('fecha_registro',)
+        read_only_fields = ('timestamp',)

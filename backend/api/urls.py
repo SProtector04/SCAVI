@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UsuarioViewSet, HealthCheckView, AccessLogViewSet
+from .views import UsuarioViewSet, AccessLogViewSet
 
 
 # Configuración de las rutas
@@ -11,5 +11,4 @@ router.register(r'access_logs', AccessLogViewSet, basename='access_log')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('test/', HealthCheckView.as_view(), name='health_check')
 ]

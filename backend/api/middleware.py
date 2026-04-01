@@ -1,4 +1,7 @@
+import logging
 from .models import AccessLog
+
+logger = logging.getLogger(__name__)
 
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
@@ -10,22 +13,24 @@ class RequestLoggingMiddleware:
         
         if any(request.path.startswith(route) for route in self.ignored_routes):
             return response
-        # Obtenemos el usuario solo si está autenticado
+        
         # usuario_actual = request.user if request.user.is_authenticated else None
-        ip_address = request.META.get('REMOTE_ADDR')
-
-        real_ip = request.META.get('HTTP_X_REAL_IP')
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip_address = x_forwarded_for.split(',')[0].strip()
+        else:
+            ip_address = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR')
         
         try:
             AccessLog.objects.create(
-            endpoint=request.path,
-            method=request.method,
-            ip_address=real_ip or ip_address
-            #usuario=usuario_actual
-            #accion=f"{request.method} {request.path}"
-        )
+                endpoint=request.path,
+                method=request.method,
+                ip_address=ip_address
+                #usuario=usuario_actual
+                #accion=f"{request.method} {request.path}"
+            )
         
-        except Exception as e:
-            print(f"Error guardando AccessLog: {e}")
+        except Exception:
+            logger.exception("Error guardando AccessLog en la base de datos")
             
         return response
