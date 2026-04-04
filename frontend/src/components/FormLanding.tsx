@@ -1,12 +1,24 @@
 import { useState, type FormEvent } from "react";
+import api from "../api/axios";
 
 const FormLanding = () => {
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSent(true);
-    // Aquí podrías agregar la lógica para enviar los datos al backend
+    
+    const formData = new FormData(event.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      // Ajustar la ruta cuando este el endpoint en Django
+      await api.post('/api/vehiculos/registro/', data);
+      
+      setSent(true);
+      console.log("Datos enviados al backend:", data);
+    } catch (error) {
+      console.error("Hubo un error al enviar el formulario:", error);
+    }
   };
 
   return (
@@ -111,7 +123,7 @@ const FormLanding = () => {
 
         {sent && (
           <div className="mt-2 rounded-xl border border-green-200 bg-green-50 p-4 text-center text-sm font-bold text-green-800 md:col-span-2">
-            ✓ ¡Solicitud enviada con éxito!
+            ¡Solicitud enviada con éxito!
           </div>
         )}
       </form>
