@@ -6,7 +6,7 @@ import ProfilePage from "./pages/ProfilePage";
 import UsersPage from "./pages/UsersPage";
 import UsersMan from "./pages/UsersMan";
 import VehicleMan from "./pages/VehicleMan";
-import History from "./pages/History";
+import HistoryPage from "./pages/HistoryPage";
 import ContactUs from "./pages/ContactUs";
 
 const PAGE_TITLES: Record<string, string> = {
@@ -49,7 +49,7 @@ function resolvePage(pathname: string) {
   }
 
   if (pathname === "/history") {
-    return <History />;
+    return <HistoryPage />;
   }
 
   if (pathname === "/contact-us") {
