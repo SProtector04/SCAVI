@@ -12,7 +12,7 @@ const FormLanding = () => {
 
     try {
       // Ajustar la ruta cuando este el endpoint en Django
-      await api.post('/api/vehiculos/registro/', data);
+      await api.post('/vehiculos/registro/', data);
       
       setSent(true);
       console.log("Datos enviados al backend:", data);
