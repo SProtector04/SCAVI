@@ -18,7 +18,7 @@ const HistoryPage = () => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await api.get("/access_logs/");
+        const response = await api.get("/registros-accesos/");
         setLogs(response.data);
       } catch (err) {
         console.error("Error al obtener los registros:", err);
