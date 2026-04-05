@@ -22,7 +22,7 @@ const HistoryPage = () => {
         setLogs(response.data);
       } catch (err) {
         console.error("Error al obtener los registros:", err);
-        setError("No se pudieron cargar los registros de acceso. Verifica la conexión con el servidor.");
+        setError("No se pudieron cargar los registros de acceso.");
       } finally {
         setLoading(false);
       }
@@ -31,12 +31,26 @@ const HistoryPage = () => {
     fetchLogs();
   }, []);
 
+  // Función auxiliar para asignar estilos basados en el estado del acceso
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'AUTORIZADO':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'DENEGADO':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'DESCONOCIDO':
+      default:
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    }
+  };
+
   return (
     <Layout>
       <div className="p-6">
         <div className="mb-6">
-          <p className="text-slate-600">
-            Monitoreo en tiempo real de los vehículos que han ingresado o intentado ingresar al recinto.
+          <h1 className="text-2xl font-bold text-slate-800">Historial de Accesos</h1>
+          <p className="mt-2 text-slate-600">
+            Monitoreo en tiempo real de los vehículos (Autorizados, Denegados o Desconocidos).
           </p>
         </div>
 
@@ -61,7 +75,7 @@ const HistoryPage = () => {
                     <td className="px-6 py-4">{log.camara}</td>
                     <td className="px-6 py-4">{new Date(log.fecha_hora).toLocaleString()}</td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${log.estado_acceso === 'AUTORIZADO' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold ${getStatusBadge(log.estado_acceso)}`}>
                         {log.estado_acceso}
                       </span>
                     </td>
