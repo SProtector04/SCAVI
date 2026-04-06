@@ -1,4 +1,5 @@
 import Layout from "@/components/layout";
+import FormLanding from "@/components/FormLanding";
 
 const VehicleMan = () => {
   return (
@@ -11,6 +12,7 @@ const VehicleMan = () => {
           Control de registro y mantenimiento de vehiculos autorizados.
         </p>
       </div>
+      <FormLanding />
     </Layout>
   );
 };

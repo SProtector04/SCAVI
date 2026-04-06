@@ -9,13 +9,16 @@ const FormLanding = () => {
     
     const formData = new FormData(event.currentTarget);
     const data = Object.fromEntries(formData.entries());
+    const payload = {
+      placa: data.plate,
+      tipo: data.role ? String(data.role).toUpperCase() : undefined,
+    };
 
     try {
-      // Ajustar la ruta cuando este el endpoint en Django
-      await api.post('/vehiculos/registro/', data);
+      await api.post('/vehiculos/', payload); 
       
       setSent(true);
-      console.log("Datos enviados al backend:", data);
+      console.log("Datos enviados al backend:", payload);
     } catch (error) {
       console.error("Hubo un error al enviar el formulario:", error);
     }
