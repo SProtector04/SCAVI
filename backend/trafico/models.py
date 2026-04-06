@@ -4,8 +4,8 @@ class Vehiculo(models.Model):
     TIPOS = (
         ('DOCENTE', 'Docente'),
         ('ESTUDIANTE', 'Estudiante'),
-        ('VISITANTE', 'Visitante')
-        ('ADMINISTRATIVO', 'Administrativo')
+        ('VISITANTE', 'Visitante'),
+        ('ADMINISTRATIVO', 'Administrativo'),
     )
     placa = models.CharField(max_length=15, primary_key=True)
     tipo = models.CharField(max_length=20, choices=TIPOS)
