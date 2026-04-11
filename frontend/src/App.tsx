@@ -95,6 +95,14 @@ function App() {
   const location = useLocation();
   const { isAuthenticated, logout } = useAuth();
 
+  // Exponer logout en window para que la sidebar pueda llamarlo
+  useEffect(() => {
+    window.logout = logout;
+    return () => {
+      delete window.logout;
+    };
+  }, [logout]);
+
   // Verificar autenticación y redirigir según la ruta actual
   useEffect(() => {
     // IMPORTANTE: Si no está autenticado, primero verificar rutas protegidas (incluye /)

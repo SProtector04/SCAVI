@@ -18,8 +18,8 @@ api.interceptors.response.use(
   (error) => {
     const url = error.config?.url || '';
     
-    // No redirigir a login cuando estamos verificando auth
-    if (url === '/auth/me/') {
+    // No redirigir a login cuando estamos verificando auth (soporta /auth/me/ y /api/auth/me/)
+    if (url.includes('/auth/me/')) {
       return Promise.reject(error);
     }
     
