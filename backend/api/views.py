@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, views
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
@@ -6,8 +6,11 @@ from rest_framework.decorators import api_view, permission_classes
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-from .models import Usuario
-from .serializers import UsuarioSerializer
+from .models import Usuario, Rol, ConfiguracionYOLO, CacheResultadoYOLO, MetricaRendimiento
+from .serializers import (
+    UsuarioSerializer, RolSerializer, ConfiguracionYOLOSerializer,
+    CacheResultadoYOLOSerializer, MetricaRendimientoSerializer
+)
 from .permissions import IsSupervisorOrAdmin
 
 
@@ -19,6 +22,39 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     """
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
+    permission_classes = [IsSupervisorOrAdmin]
+
+
+class RolViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for Rol model.
+    - Read: any authenticated user (ADMIN or SUPERVISOR)
+    - Write: only ADMIN
+    """
+    queryset = Rol.objects.all()
+    serializer_class = RolSerializer
+    permission_classes = [IsSupervisorOrAdmin]
+
+
+class ConfiguracionYOLOViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for ConfiguracionYOLO model.
+    - Read: any authenticated user (ADMIN or SUPERVISOR)
+    - Write: only ADMIN
+    """
+    queryset = ConfiguracionYOLO.objects.all()
+    serializer_class = ConfiguracionYOLOSerializer
+    permission_classes = [IsSupervisorOrAdmin]
+
+
+class MetricaRendimientoViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for MetricaRendimiento model.
+    - Read: any authenticated user (ADMIN or SUPERVISOR)
+    - Write: only ADMIN
+    """
+    queryset = MetricaRendimiento.objects.all()
+    serializer_class = MetricaRendimientoSerializer
     permission_classes = [IsSupervisorOrAdmin]
 
 
