@@ -76,7 +76,19 @@ function useAuth() {
     window.location.href = "/login";
   }, []);
 
-  return { isAuthenticated, logout };
+  // Función para obtener el rol del usuario
+  const getUserRole = useCallback(() => {
+    const userStr = localStorage.getItem("user");
+    if (!userStr) return null;
+    try {
+      const user = JSON.parse(userStr);
+      return user.rol || null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  return { isAuthenticated, logout, getUserRole };
 }
 
 function PlaceholderPage({ title }: { title: string }) {
@@ -93,7 +105,7 @@ function PlaceholderPage({ title }: { title: string }) {
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, getUserRole } = useAuth();
 
   // Exponer logout en window para que la sidebar pueda llamarlo
   useEffect(() => {
@@ -108,6 +120,18 @@ function App() {
     // IMPORTANTE: Si no está autenticado, primero verificar rutas protegidas (incluye /)
     // Esto debe ejecutarse ANTES de cualquier otra lógica
     const currentPath = location.pathname;
+
+    // Rutas que solo ADMIN puede acceder
+    const adminOnlyRoutes = ["/users", "/users-management", "/settings"];
+    
+    // Si está en ruta de admin y no es admin, redirigir a dashboard
+    if (adminOnlyRoutes.includes(currentPath)) {
+      const role = getUserRole();
+      if (role !== "ADMIN") {
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+    }
 
     // Si está en ruta protegida y NO está autenticado, redirigir a login
     if (PROTECTED_ROUTES.includes(currentPath) && isAuthenticated === false) {
