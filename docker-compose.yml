@@ -11,8 +11,8 @@ services:
     volumes:
       - ./backend:/app
     command: >
-      sh -c "python manage.py makemigrations &&
-            python manage.py migrate &&
+      sh -c "python manage.py makemigrations --noinput &&
+            python manage.py migrate --noinput &&
             python manage.py runserver 0.0.0.0:8000"
     ports:
       - "127.0.0.1:8000:8000" 
