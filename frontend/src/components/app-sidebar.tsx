@@ -150,7 +150,10 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <button className="flex items-center gap-3 w-full justify-start text-red-600 hover:text-red-700">
+              <button 
+                onClick={() => window.logout?.()}
+                className="flex items-center gap-3 w-full justify-start text-red-600 hover:text-red-700"
+              >
                 <LogOut className="h-4 w-4" />
                 <span>Cerrar sesion</span>
               </button>
