@@ -1,9 +1,8 @@
-import Layout from "@/components/layout";
 import FormLanding from "@/components/FormLanding";
 
 const VehicleMan = () => {
   return (
-    <Layout>
+    <>
       <div className="p-6">
         <h1 className="text-2xl font-bold text-slate-800">
           Gestion de vehiculos
@@ -13,7 +12,7 @@ const VehicleMan = () => {
         </p>
       </div>
       <FormLanding />
-    </Layout>
+    </>
   );
 };
 
