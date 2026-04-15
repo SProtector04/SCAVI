@@ -132,6 +132,93 @@ class RefreshView(views.APIView):
             )
 
 
+class RegisterView(views.APIView):
+    """
+    POST /api/auth/register/
+    Creates a new user with rol ADMIN or SUPERVISOR.
+    Only accessible to users with rol ADMIN.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        # Verificar que el usuario actual es ADMIN
+        if request.user.rol != 'ADMIN':
+            return Response(
+                {'error': 'Solo administradores pueden crear usuarios'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Obtener datos del request
+        username = request.data.get('username')
+        password = request.data.get('password')
+        confirmed_password = request.data.get('confirmPassword')
+        rol = request.data.get('rol', 'SUPERVISOR')  # Default a SUPERVISOR
+        email = request.data.get('email', '')
+        
+        # Validaciones
+        if not username or not password:
+            return Response(
+                {'error': 'Username y password son requeridos'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if len(username) < 3:
+            return Response(
+                {'error': 'El username debe tener al menos 3 caracteres'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if len(password) < 6:
+            return Response(
+                {'error': 'El password debe tener al menos 6 caracteres'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if password != confirmed_password:
+            return Response(
+                {'error': 'Los passwords no coinciden'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if rol not in ['ADMIN', 'SUPERVISOR']:
+            return Response(
+                {'error': 'Rol inválido. Debe ser ADMIN o SUPERVISOR'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verificar que el username no exista
+        if User.objects.filter(username=username).exists():
+            return Response(
+                {'error': 'El username ya existe'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Crear el usuario
+        try:
+            new_user = User.objects.create_user(
+                username=username,
+                password=password,
+                email=email,
+                rol=rol,
+            )
+            
+            return Response({
+                'message': 'Usuario creado exitosamente',
+                'user': {
+                    'id': new_user.id,
+                    'username': new_user.username,
+                    'email': new_user.email,
+                    'rol': new_user.rol,
+                }
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error al crear usuario: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
 class CurrentUserView(views.APIView):
     """
     GET /api/auth/me/
