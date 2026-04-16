@@ -1,5 +1,5 @@
 # --- ETAPA 1: Base (Python y dependencias) ---
-FROM python:3.11-slim AS base
+FROM python:3.12-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
