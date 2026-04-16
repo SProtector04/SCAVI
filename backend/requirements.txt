@@ -1,20 +1,33 @@
-asgiref==3.11.1
+# ==========================================
+# SCAVI Backend Requirements
+# ==========================================
+
+# --- Django Core & DB ---
 Django==6.0.3
+psycopg2-binary==2.9.11
 django-cors-headers==4.9.0
 django-extensions==4.1
+
+# --- Django Rest Framework & Auth ---
 djangorestframework==3.17.1
 djangorestframework-simplejwt==5.3.1
-psycopg2-binary==2.9.11
-pydotplus==2.0.2
-pyparsing==3.3.2
-sqlparse==0.5.5
-tzdata==2026.1
+pyjwt==2.9.0
+cryptography==44.0.0
+
+# --- WebSockets (Channels & ASGI) ---
 channels==4.1.0
 channels-redis==4.2.0
 daphne==4.1.0
-pyjwt==2.9.0
-cryptography==44.0.0
+asgiref==3.11.1
+
+# --- IA, Computer Vision & OCR ---
 ultralytics>=8.0.0
 opencv-python>=4.8.0
 pytesseract>=0.3.10
 Pillow>=10.0.0
+
+# --- Utils ---
+pydotplus==2.0.2
+pyparsing==3.3.2
+sqlparse==0.5.5
+tzdata==2026.1
