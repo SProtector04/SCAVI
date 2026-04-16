@@ -9,11 +9,14 @@ docker compose up --build
 
 Services: `web:5173` (frontend), `api:8000` (Django), `db:5432` (PostgreSQL), `nginx:80`.
 
+**Required env file**: `.env` defines `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DEBUG`, `NODE_ENV`.
+
 ## Key commands
 
-- **Backend migrations**: Auto-run on container start (in docker-compose command). Manual: `docker exec <container> python manage.py makemigrations && python manage.py migrate`
+- **Backend migrations**: Auto-run on container start. Manual: `docker exec <container> python manage.py makemigrations && python manage.py migrate`
 - **Frontend build**: `cd frontend && npm run build`
 - **Frontend lint**: `cd frontend && npm run lint`
+- **Frontend typecheck**: `cd frontend && npx tsc --noEmit`
 
 ## API structure
 
@@ -37,7 +40,8 @@ Services: `web:5173` (frontend), `api:8000` (Django), `db:5432` (PostgreSQL), `n
 
 ## Important notes
 
-- No Redis in docker-compose - CHANNEL_LAYERS uses InMemoryChannelLayer
-- CORS requires `X-CSRFToken` header on requests with credentials
-- CSRF cookie is readable by JS (`CSRF_COOKIE_HTTPONLY = False`)
-- Language setting: `es-ni` (not standard es/)
+- **No Redis**: CHANNEL_LAYERS uses `InMemoryChannelLayer` (dev only)
+- **CORS**: Requires `X-CSRFToken` header on requests with credentials; CSRF cookie readable by JS
+- **Language**: `LANGUAGE_CODE = 'es-ni'` (not standard `es/`)
+- **JWT**: Tokens in httpOnly cookies; access lifetime 15 minutes, refresh 7 days
+- **Static/Media**: Django serves media at `/media/` (ANPR uploads); static at `/static/`
