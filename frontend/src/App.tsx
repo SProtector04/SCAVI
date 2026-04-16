@@ -32,11 +32,11 @@ const PROTECTED_ROUTES = [
   "/users-management",
   "/vehicle-management",
   "/history",
+  "/alerts",
   "/contact-us",
   "/perfil",
   "/profile",
   "/settings",
-  "/alerts",
 ];
 
 // Hook personalizado para verificar autenticación
@@ -121,18 +121,6 @@ function App() {
   // Verificar autenticación y redirigir según la ruta actual
   useEffect(() => {
     const currentPath = location.pathname;
-
-    // Rutas que solo ADMIN puede acceder
-    const adminOnlyRoutes = ["/users-management", "/settings"];
-    
-    // Si está en ruta de admin y no es admin, redirigir a dashboard
-    if (adminOnlyRoutes.includes(currentPath)) {
-      const role = getUserRole();
-      if (role !== "ADMIN" && role !== null) {
-        navigate("/dashboard", { replace: true });
-        return;
-      }
-    }
 
     // Si está en ruta protegida y NO está autenticado, redirigir a login
     if (PROTECTED_ROUTES.includes(currentPath) && isAuthenticated === false) {
