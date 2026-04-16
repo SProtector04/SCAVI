@@ -4,29 +4,41 @@
 
 @layer base {
   :root {
-    /* Brand Colors - Tory Blue */
-    --primary: 212 78% 27%  /* #085FA5 */;
-    --primary-foreground: 0 0% 100%;
+    /* OKLCH approximations in HSL for Tailwind 3 compatibility */
     
-    /* Secondary - Teal */
-    --secondary: 175 62% 36%  /* #24908F */;
-    --secondary-foreground: 0 0% 100%;
-    
-    /* Accent - Orange */
-    --accent: 29 86% 60%  /* #F4A261 */;
-    --accent-foreground: 33 56% 24%;
-    
-    /* Neutrals */
-    --background: 0 0% 100%;
+    /* Background & Foreground */
+    --background: 222 84% 4.9%;
     --foreground: 222 84% 4.9%;
+    
+    /* Card */
     --card: 0 0% 100%;
     --card-foreground: 222 84% 4.9%;
+    
+    /* Popover */
     --popover: 0 0% 100%;
     --popover-foreground: 222 84% 4.9%;
+    
+    /* Brand Colors - Tory Blue (#085FA5) */
+    --primary: 212 78% 27%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary - Teal (#24908F) */
+    --secondary: 175 62% 36%;
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Neutrals */
     --muted: 210 40% 96.1%;
     --muted-foreground: 215 20% 45%;
+    
+    /* Accent - Orange (#F4A261) */
+    --accent: 29 86% 60%;
+    --accent-foreground: 33 56% 24%;
+    
+    /* Destructive - Red */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
+    
+    /* Border & Input */
     --border: 214 14% 87%;
     --input: 214 14% 87%;
     --ring: 212 78% 27%;
@@ -55,23 +67,32 @@
   .dark {
     --background: 222 84% 4.9%;
     --foreground: 210 40% 98%;
+    
     --card: 222 84% 8%;
     --card-foreground: 210 40% 98%;
+    
     --popover: 222 84% 8%;
     --popover-foreground: 210 40% 98%;
+    
     --primary: 210 40% 98%;
     --primary-foreground: 222 47% 12%;
+    
     --secondary: 215 20% 22%;
     --secondary-foreground: 210 40% 98%;
+    
     --muted: 215 20% 22%;
     --muted-foreground: 215 20% 65%;
+    
     --accent: 215 20% 22%;
     --accent-foreground: 210 40% 98%;
+    
     --destructive: 0 62% 31%;
     --destructive-foreground: 210 40% 98%;
+    
     --border: 215 20% 22%;
     --input: 215 20% 22%;
     --ring: 212 78% 50%;
+    
     --sidebar: 215 20% 15%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 212 78% 40%;
@@ -80,6 +101,7 @@
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 215 15% 22%;
     --sidebar-ring: 212 78% 50%;
+    
     --chart-1: 212 78% 50%;
     --chart-2: 175 62% 45%;
     --chart-3: 29 86% 60%;

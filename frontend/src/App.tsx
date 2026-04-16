@@ -13,6 +13,8 @@ import HistoryPage from "./pages/HistoryPage";
 import ContactUs from "./pages/ContactUs";
 import LoginPage from "./pages/LoginPage";
 import Landing from "./pages/Landing";
+import SettingsPage from "./pages/SettingsPage";
+import AlertsPage from "./pages/AlertsPage";
 
 const PAGE_TITLES: Record<string, string> = {
   "/users": "Usuarios",
@@ -34,6 +36,7 @@ const PROTECTED_ROUTES = [
   "/perfil",
   "/profile",
   "/settings",
+  "/alerts",
 ];
 
 // Hook personalizado para verificar autenticación
@@ -117,17 +120,15 @@ function App() {
 
   // Verificar autenticación y redirigir según la ruta actual
   useEffect(() => {
-    // IMPORTANTE: Si no está autenticado, primero verificar rutas protegidas (incluye /)
-    // Esto debe ejecutarse ANTES de cualquier otra lógica
     const currentPath = location.pathname;
 
     // Rutas que solo ADMIN puede acceder
-    const adminOnlyRoutes = ["/users", "/users-management", "/settings"];
+    const adminOnlyRoutes = ["/users-management", "/settings"];
     
     // Si está en ruta de admin y no es admin, redirigir a dashboard
     if (adminOnlyRoutes.includes(currentPath)) {
       const role = getUserRole();
-      if (role !== "ADMIN") {
+      if (role !== "ADMIN" && role !== null) {
         navigate("/dashboard", { replace: true });
         return;
       }
@@ -152,7 +153,7 @@ function App() {
     
     // Si está en / (raíz) y NO está autenticado, mostrar landing
     if (currentPath === "/" && !isAuthenticated) {
-      return; // Allow rendering landing page
+      return;
     }
 
     // Si está en / (raíz) y está autenticado, ir a dashboard
@@ -160,7 +161,7 @@ function App() {
       navigate("/dashboard", { replace: true });
       return;
     }
-  }, [location.pathname, isAuthenticated, navigate]);
+  }, [location.pathname, isAuthenticated, navigate, getUserRole]);
 
   // Mostrar loading mientras se verifica autenticación
   if (isAuthenticated === null) {
@@ -226,6 +227,14 @@ function App() {
 
     if (pathname === "/perfil" || pathname === "/profile") {
       return <ProfilePage />;
+    }
+
+    if (pathname === "/settings") {
+      return <SettingsPage />;
+    }
+
+    if (pathname === "/alerts") {
+      return <AlertsPage />;
     }
 
     if (PAGE_TITLES[pathname]) {
