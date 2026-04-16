@@ -1,6 +1,6 @@
 // src/App.tsx
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "./api/axios";
 import Footer from "./components/Footer";
 import DashboardPage from "./pages/DashboardPage";
@@ -12,6 +12,7 @@ import VehicleMan from "./pages/VehicleMan";
 import HistoryPage from "./pages/HistoryPage";
 import ContactUs from "./pages/ContactUs";
 import LoginPage from "./pages/LoginPage";
+import Landing from "./pages/Landing";
 
 const PAGE_TITLES: Record<string, string> = {
   "/users": "Usuarios",
@@ -24,7 +25,6 @@ const PAGE_TITLES: Record<string, string> = {
 
 // Rutas que requieren autenticación
 const PROTECTED_ROUTES = [
-  "/",
   "/dashboard",
   "/users",
   "/users-management",
@@ -76,7 +76,19 @@ function useAuth() {
     window.location.href = "/login";
   }, []);
 
-  return { isAuthenticated, logout };
+  // Función para obtener el rol del usuario
+  const getUserRole = useCallback(() => {
+    const userStr = localStorage.getItem("user");
+    if (!userStr) return null;
+    try {
+      const user = JSON.parse(userStr);
+      return user.rol || null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  return { isAuthenticated, logout, getUserRole };
 }
 
 function PlaceholderPage({ title }: { title: string }) {
@@ -93,7 +105,7 @@ function PlaceholderPage({ title }: { title: string }) {
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, getUserRole } = useAuth();
 
   // Exponer logout en window para que la sidebar pueda llamarlo
   useEffect(() => {
@@ -108,6 +120,18 @@ function App() {
     // IMPORTANTE: Si no está autenticado, primero verificar rutas protegidas (incluye /)
     // Esto debe ejecutarse ANTES de cualquier otra lógica
     const currentPath = location.pathname;
+
+    // Rutas que solo ADMIN puede acceder
+    const adminOnlyRoutes = ["/users", "/users-management", "/settings"];
+    
+    // Si está en ruta de admin y no es admin, redirigir a dashboard
+    if (adminOnlyRoutes.includes(currentPath)) {
+      const role = getUserRole();
+      if (role !== "ADMIN") {
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+    }
 
     // Si está en ruta protegida y NO está autenticado, redirigir a login
     if (PROTECTED_ROUTES.includes(currentPath) && isAuthenticated === false) {
@@ -125,9 +149,14 @@ function App() {
       navigate("/dashboard", { replace: true });
       return;
     }
+    
+    // Si está en / (raíz) y NO está autenticado, mostrar landing
+    if (currentPath === "/" && !isAuthenticated) {
+      return; // Allow rendering landing page
+    }
 
     // Si está en / (raíz) y está autenticado, ir a dashboard
-    if (currentPath === "/") {
+    if (currentPath === "/" && isAuthenticated) {
       navigate("/dashboard", { replace: true });
       return;
     }
@@ -150,6 +179,11 @@ function App() {
     return <LoginPage />;
   }
 
+  // Si está en / (raíz) y NO está autenticado, mostrar landing
+  if (location.pathname === "/" && !isAuthenticated) {
+    return <Landing />;
+  }
+
   // Rutas protegidas necesitan autenticación
   const isProtectedRoute = PROTECTED_ROUTES.includes(location.pathname);
 
@@ -166,7 +200,7 @@ function App() {
 
   // Renderizar según la ruta
   const resolvePage = (pathname: string) => {
-    if (pathname === "/" || pathname === "/dashboard") {
+    if (pathname === "/dashboard") {
       return <DashboardPage />;
     }
 
