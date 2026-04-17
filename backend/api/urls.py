@@ -39,6 +39,7 @@ auth_patterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('refresh/', auth_views.RefreshView.as_view(), name='refresh'),
     path('me/', auth_views.CurrentUserView.as_view(), name='current_user'),
+    path('register/', auth_views.RegisterView.as_view(), name='register'),
 ]
 
 # Device ingestion endpoint
