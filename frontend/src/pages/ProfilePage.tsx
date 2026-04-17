@@ -14,8 +14,6 @@ interface UserProfile {
   last_name?: string
   email?: string
   rol?: string
-  departamento?: string
-  telefono?: string
   is_active?: boolean
 }
 
@@ -28,8 +26,6 @@ function ProfilePage() {
     first_name: "",
     last_name: "",
     email: "",
-    telefono: "",
-    departamento: "",
   })
   const [notifications, setNotifications] = useState({
     email: true,
@@ -47,8 +43,6 @@ function ProfilePage() {
           first_name: userData.first_name || "",
           last_name: userData.last_name || "",
           email: userData.email || "",
-          telefono: userData.telefono || "",
-          departamento: userData.departamento || "",
         })
       } catch {
         const storedUser = localStorage.getItem("user")
@@ -59,8 +53,6 @@ function ProfilePage() {
             first_name: userData.first_name || "",
             last_name: userData.last_name || "",
             email: userData.email || "",
-            telefono: userData.telefono || "",
-            departamento: userData.departamento || "",
           })
         }
       } finally {
@@ -131,12 +123,6 @@ function ProfilePage() {
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">{profile?.email}</span>
               </div>
-              {profile?.departamento && (
-                <div className="flex items-center gap-3 text-sm">
-                  <Building className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">{profile.departamento}</span>
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
@@ -178,22 +164,6 @@ function ProfilePage() {
                   placeholder="correo@ejemplo.com"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Teléfono</label>
-                <Input
-                  value={formData.telefono}
-                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                  placeholder="+505 XXXX-XXXX"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Departamento</label>
-              <Input
-                value={formData.departamento}
-                onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
-                placeholder="Departamento"
-              />
             </div>
             <div className="flex items-center gap-2 pt-2">
               <Button onClick={handleSave} disabled={saving}>
