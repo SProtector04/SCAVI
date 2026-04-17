@@ -119,7 +119,6 @@ function VehicleMan() {
   }
 
   return (
-<<<<<<< HEAD
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -131,21 +130,6 @@ function VehicleMan() {
           Nuevo Vehículo
         </Button>
       </div>
-=======
-    <>
-      <div className="p-6">
-        <h1 className="text-2xl font-bold text-slate-800">
-          Gestion de vehiculos
-        </h1>
-        <p className="mt-2 text-slate-600">
-          Control de registro y mantenimiento de vehiculos autorizados.
-        </p>
-      </div>
-      <FormLanding />
-    </>
-  );
-};
->>>>>>> origin/develop
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
