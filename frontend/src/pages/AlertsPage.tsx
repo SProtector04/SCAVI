@@ -1,57 +1,37 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { AlertTriangle, AlertCircle, Info, Clock } from "lucide-react"
+import { AlertTriangle, AlertCircle, Info, Clock, CheckCircle } from "lucide-react"
 import api from "../api/axios"
 
 interface Alerta {
   id: number
-  tipo: "warning" | "error" | "info"
+  tipo: string
+  prioridad: string
   titulo: string
   descripcion: string
-  fecha: string
+  esta_resuelta: boolean
+  creado_en: string
 }
 
-const mockAlertas: Alerta[] = [
-  {
-    id: 1,
-    tipo: "warning",
-    titulo: "Acceso denegado múltiple",
-    descripcion: "El vehículo con placa MNO-987 ha intentado ingresar 3 veces sin autorización.",
-    fecha: "18/03/2026 09:45",
-  },
-  {
-    id: 2,
-    tipo: "error",
-    titulo: "Cámara fuera de línea",
-    descripcion: "La cámara del Estacionamiento C no responde. Verificar conexión de red.",
-    fecha: "18/03/2026 09:30",
-  },
-  {
-    id: 3,
-    tipo: "warning",
-    titulo: "Vehículo no registrado",
-    descripcion: "Vehículo desconocido detectado en zona de carga. Placa: QRS-555.",
-    fecha: "18/03/2026 09:15",
-  },
-  {
-    id: 4,
-    tipo: "info",
-    titulo: "Mantenimiento programado",
-    descripcion: "Mantenimiento de barrera Entrada Principal programado para mañana 06:00.",
-    fecha: "18/03/2026 08:00",
-  },
-  {
-    id: 5,
-    tipo: "warning",
-    titulo: "Alta afluencia detectada",
-    descripcion: "Tiempo de espera superior a 5 minutos en Entrada Principal.",
-    fecha: "18/03/2026 07:45",
-  },
-]
+const tipoIconMap: Record<string, React.ElementType> = {
+  ERROR_INFERENCIA: AlertCircle,
+  BAJA_CONFIANZA: AlertTriangle,
+  ACCESO_SOSPECHOSO: AlertTriangle,
+  FALLA_CAMARA: AlertCircle,
+  SISTEMA: Info,
+}
+
+const prioridadColorMap: Record<string, string> = {
+  BAJA: "bg-blue-100 text-blue-700",
+  MEDIA: "bg-yellow-100 text-yellow-700",
+  ALTA: "bg-orange-100 text-orange-700",
+  CRITICA: "bg-red-100 text-red-700",
+}
 
 function AlertsPage() {
   const [alertas, setAlertas] = useState<Alerta[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   useEffect(() => {
     const fetchAlertas = async () => {
@@ -60,8 +40,9 @@ function AlertsPage() {
         const data = response.data
         const alertasArray = Array.isArray(data) ? data : (data.results || [])
         setAlertas(alertasArray)
-      } catch {
-        setAlertas(mockAlertas)
+      } catch (err) {
+        console.error("Error fetching alertas:", err)
+        setError("No se pudieron cargar las alertas")
       } finally {
         setLoading(false)
       }
@@ -69,16 +50,15 @@ function AlertsPage() {
     fetchAlertas()
   }, [])
 
-  const iconMap = {
-    warning: AlertTriangle,
-    error: AlertCircle,
-    info: Info,
-  }
-
-  const colorMap = {
-    warning: "bg-yellow-100 text-yellow-700",
-    error: "bg-red-100 text-red-700",
-    info: "bg-blue-100 text-blue-700",
+  const formatFecha = (fechaStr: string) => {
+    const fecha = new Date(fechaStr)
+    return fecha.toLocaleString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
   }
 
   return (
@@ -87,6 +67,12 @@ function AlertsPage() {
         <h1 className="text-2xl font-bold text-foreground">Alertas del Sistema</h1>
         <p className="text-muted-foreground">Monitorea las alertas y notificaciones del sistema</p>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
+          {error}
+        </div>
+      )}
 
       <Card className="border-border bg-card shadow-sm">
         <CardHeader>
@@ -102,35 +88,41 @@ function AlertsPage() {
           ) : (
             <div className="space-y-4">
               {alertas.map((alerta) => {
-                const Icon = iconMap[alerta.tipo]
-                const colorClass = colorMap[alerta.tipo]
+                const Icon = tipoIconMap[alerta.tipo] || Info
+                const prioridadClass = prioridadColorMap[alerta.prioridad] || "bg-gray-100 text-gray-700"
 
                 return (
                   <div
                     key={alerta.id}
                     className="flex gap-4 rounded-lg border border-border bg-muted/20 p-4"
                   >
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${colorClass}`}
-                    >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-yellow-100 text-yellow-700">
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-medium text-foreground">{alerta.titulo}</h3>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>{alerta.fecha}</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${prioridadClass}`}>
+                            {alerta.prioridad}
+                          </span>
+                          {alerta.esta_resuelta && (
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          )}
                         </div>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">{alerta.descripcion}</p>
+                      <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>{formatFecha(alerta.creado_en)}</span>
+                      </div>
                     </div>
                   </div>
                 )
               })}
               {alertas.length === 0 && (
                 <div className="py-8 text-center text-muted-foreground">
-                  No hay alertas activas en el sistema
+                  No hay alertas en el sistema
                 </div>
               )}
             </div>
