@@ -13,17 +13,8 @@ interface Usuario {
   last_name?: string
   email?: string
   rol?: string
-  departamento?: string
   is_active?: boolean
 }
-
-const mockUsuarios: Usuario[] = [
-  { id: 1, username: "mgarcia", first_name: "María", last_name: "García", email: "mgarcia@ulsa.edu.ni", rol: "Docente", departamento: "Ingeniería", is_active: true },
-  { id: 2, username: "cmartinez", first_name: "Carlos", last_name: "Martínez", email: "cmartinez@ulsa.edu.ni", rol: "Administrativo", departamento: "Recursos Humanos", is_active: true },
-  { id: 3, username: "alopez", first_name: "Ana", last_name: "López", email: "alopez@ulsa.edu.ni", rol: "Docente", departamento: "Ciencias", is_active: true },
-  { id: 4, username: "jrodriguez", first_name: "Juan", last_name: "Rodríguez", email: "jrodriguez@ulsa.edu.ni", rol: "Estudiante", departamento: "Arquitectura", is_active: false },
-  { id: 5, username: "lfernandez", first_name: "Laura", last_name: "Fernández", email: "lfernandez@ulsa.edu.ni", rol: "Docente", departamento: "Derecho", is_active: true },
-]
 
 function UsersMan() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
@@ -36,8 +27,7 @@ function UsersMan() {
     first_name: "",
     last_name: "",
     email: "",
-    rol: "Usuario",
-    departamento: "",
+    rol: "SUPERVISOR",
     password: "",
   })
 
@@ -48,8 +38,8 @@ function UsersMan() {
         const data = response.data
         const usuariosArray = Array.isArray(data) ? data : (data.results || [])
         setUsuarios(usuariosArray)
-      } catch {
-        setUsuarios(mockUsuarios)
+      } catch (err) {
+        console.error("Error fetching usuarios:", err)
       } finally {
         setLoading(false)
       }
@@ -75,8 +65,7 @@ function UsersMan() {
         first_name: usuario.first_name || "",
         last_name: usuario.last_name || "",
         email: usuario.email || "",
-        rol: usuario.rol || "Usuario",
-        departamento: usuario.departamento || "",
+        rol: usuario.rol || "SUPERVISOR",
         password: "",
       })
     } else {
@@ -86,8 +75,7 @@ function UsersMan() {
         first_name: "",
         last_name: "",
         email: "",
-        rol: "Usuario",
-        departamento: "",
+        rol: "SUPERVISOR",
         password: "",
       })
     }
@@ -178,7 +166,6 @@ function UsersMan() {
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Usuario</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Email</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Rol</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Departamento</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Estado</th>
                   <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Acciones</th>
                 </tr>
@@ -218,7 +205,6 @@ function UsersMan() {
                           {usuario.rol}
                         </Badge>
                       </td>
-                      <td className="px-4 py-4 text-sm text-foreground">{usuario.departamento}</td>
                       <td className="px-4 py-4">
                         <button
                           onClick={() => handleToggleActive(usuario)}
@@ -309,20 +295,9 @@ function UsersMan() {
                     onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   >
-                    <option value="Usuario">Usuario</option>
-                    <option value="Docente">Docente</option>
-                    <option value="Estudiante">Estudiante</option>
-                    <option value="Administrativo">Administrativo</option>
+                    <option value="SUPERVISOR">Supervisor</option>
                     <option value="ADMIN">Administrador</option>
                   </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Departamento</label>
-                  <Input
-                    value={formData.departamento}
-                    onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
-                    placeholder="Departamento"
-                  />
                 </div>
               </div>
 
