@@ -122,6 +122,18 @@ function App() {
   useEffect(() => {
     const currentPath = location.pathname;
 
+    // Rutas que solo ADMIN puede acceder
+    const adminOnlyRoutes = ["/users", "/users-management", "/settings"];
+    
+    // Si está en ruta de admin y no es admin, redirigir a dashboard
+    if (adminOnlyRoutes.includes(currentPath)) {
+      const role = getUserRole();
+      if (role !== "ADMIN") {
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+    }
+
     // Si está en ruta protegida y NO está autenticado, redirigir a login
     if (PROTECTED_ROUTES.includes(currentPath) && isAuthenticated === false) {
       navigate("/login", { replace: true });
