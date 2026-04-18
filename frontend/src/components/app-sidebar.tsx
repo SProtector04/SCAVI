@@ -21,6 +21,7 @@ import {
   Settings,
   LogOut,
   User,
+  Bell,
 } from "lucide-react";
 
 const navigationItems = [
@@ -48,6 +49,11 @@ const navigationItems = [
     title: "Historial",
     url: "/history",
     icon: HistoryIcon,
+  },
+  {
+    title: "Alertas",
+    url: "/alerts",
+    icon: Bell,
   },
   {
     title: "Contacto",

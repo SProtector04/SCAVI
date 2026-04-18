@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY','iaowd&twl9dnu%$(5(r97-gmcw&!4idlk^d@7e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'api']
 
 # CORS settings for development
 CORS_ALLOWED_ORIGINS = [
@@ -38,7 +38,12 @@ CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 # CSRF settings
 CSRF_COOKIE_HTTPONLY = False  # JS needs to read for X-CSRFToken header
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:80",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:80",
+]
 
 # Application definition
 

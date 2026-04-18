@@ -3,7 +3,8 @@
 # ==========================================
 
 # --- Django Core & DB ---
-Django==6.0.3
+Django>=5.2,<6.0
+# descomentar si el anterior da problemas Django==6.0.3
 psycopg2-binary==2.9.11
 django-cors-headers==4.9.0
 django-extensions==4.1

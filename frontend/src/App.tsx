@@ -1,6 +1,6 @@
 // src/App.tsx
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "./api/axios";
 import Footer from "./components/Footer";
 import DashboardPage from "./pages/DashboardPage";
@@ -12,6 +12,9 @@ import VehicleMan from "./pages/VehicleMan";
 import HistoryPage from "./pages/HistoryPage";
 import ContactUs from "./pages/ContactUs";
 import LoginPage from "./pages/LoginPage";
+import Landing from "./pages/Landing";
+import SettingsPage from "./pages/SettingsPage";
+import AlertsPage from "./pages/AlertsPage";
 
 const PAGE_TITLES: Record<string, string> = {
   "/users": "Usuarios",
@@ -24,12 +27,12 @@ const PAGE_TITLES: Record<string, string> = {
 
 // Rutas que requieren autenticación
 const PROTECTED_ROUTES = [
-  "/",
   "/dashboard",
   "/users",
   "/users-management",
   "/vehicle-management",
   "/history",
+  "/alerts",
   "/contact-us",
   "/perfil",
   "/profile",
@@ -117,8 +120,6 @@ function App() {
 
   // Verificar autenticación y redirigir según la ruta actual
   useEffect(() => {
-    // IMPORTANTE: Si no está autenticado, primero verificar rutas protegidas (incluye /)
-    // Esto debe ejecutarse ANTES de cualquier otra lógica
     const currentPath = location.pathname;
 
     // Rutas que solo ADMIN puede acceder
@@ -149,13 +150,18 @@ function App() {
       navigate("/dashboard", { replace: true });
       return;
     }
+    
+    // Si está en / (raíz) y NO está autenticado, mostrar landing
+    if (currentPath === "/" && !isAuthenticated) {
+      return;
+    }
 
     // Si está en / (raíz) y está autenticado, ir a dashboard
-    if (currentPath === "/") {
+    if (currentPath === "/" && isAuthenticated) {
       navigate("/dashboard", { replace: true });
       return;
     }
-  }, [location.pathname, isAuthenticated, navigate]);
+  }, [location.pathname, isAuthenticated, navigate, getUserRole]);
 
   // Mostrar loading mientras se verifica autenticación
   if (isAuthenticated === null) {
@@ -174,6 +180,11 @@ function App() {
     return <LoginPage />;
   }
 
+  // Si está en / (raíz) y NO está autenticado, mostrar landing
+  if (location.pathname === "/" && !isAuthenticated) {
+    return <Landing />;
+  }
+
   // Rutas protegidas necesitan autenticación
   const isProtectedRoute = PROTECTED_ROUTES.includes(location.pathname);
 
@@ -190,7 +201,7 @@ function App() {
 
   // Renderizar según la ruta
   const resolvePage = (pathname: string) => {
-    if (pathname === "/" || pathname === "/dashboard") {
+    if (pathname === "/dashboard") {
       return <DashboardPage />;
     }
 
@@ -216,6 +227,14 @@ function App() {
 
     if (pathname === "/perfil" || pathname === "/profile") {
       return <ProfilePage />;
+    }
+
+    if (pathname === "/settings") {
+      return <SettingsPage />;
+    }
+
+    if (pathname === "/alerts") {
+      return <AlertsPage />;
     }
 
     if (PAGE_TITLES[pathname]) {

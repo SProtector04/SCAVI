@@ -18,7 +18,7 @@ class IsSupervisorOrAdmin(permissions.BasePermission):
     """
     Permission class that:
     - Allows read access to any authenticated user (ADMIN or SUPERVISOR)
-    - Allows write access only to ADMIN
+    - Allows write access to ADMIN or SUPERVISOR
     """
     
     def has_permission(self, request, view):
@@ -29,5 +29,5 @@ class IsSupervisorOrAdmin(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         
-        # Only ADMIN can write
-        return request.user.rol == 'ADMIN'
+        # ADMIN and SUPERVISOR can write
+        return request.user.rol in ['ADMIN', 'SUPERVISOR']

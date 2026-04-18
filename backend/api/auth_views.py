@@ -223,11 +223,37 @@ class CurrentUserView(views.APIView):
     """
     GET /api/auth/me/
     Returns current authenticated user info.
+    PATCH /api/auth/me/
+    Update current user profile.
     """
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
         user = request.user
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'rol': user.rol,
+            'is_active': user.is_active,
+        })
+    
+    def patch(self, request):
+        user = request.user
+        data = request.data
+        
+        # Update allowed fields
+        if 'first_name' in data:
+            user.first_name = data['first_name']
+        if 'last_name' in data:
+            user.last_name = data['last_name']
+        if 'email' in data:
+            user.email = data['email']
+        
+        user.save()
+        
         return Response({
             'id': user.id,
             'username': user.username,

@@ -9,7 +9,24 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// No usamos interceptor de request porque el JWT está en cookies httpOnly
+// Interceptor para agregar CSRF token a las requests
+api.interceptors.request.use(
+  (config) => {
+    // Obtener CSRF token de la cookie
+    const cookies = document.cookie.split('; ');
+    const csrfToken = cookies.find(row => row.startsWith('csrftoken='))?.split('=')[1];
+    
+    console.log('Cookies:', document.cookie);
+    console.log('CSRF Token:', csrfToken);
+    
+    if (csrfToken) {
+      config.headers['X-CSRFToken'] = csrfToken;
+    }
+    
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Interceptor para manejar respuestas 401 (no autorizado)
 // EXCEPTO para /auth/me/ que se usa para verificar autenticación
