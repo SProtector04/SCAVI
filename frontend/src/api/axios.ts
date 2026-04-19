@@ -30,20 +30,64 @@ api.interceptors.request.use(
 
 // Interceptor para manejar respuestas 401 (no autorizado)
 // EXCEPTO para /auth/me/ que se usa para verificar autenticación
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    const url = error.config?.url || '';
+  async (error) => {
+    const originalRequest = error.config;
+    const url = originalRequest?.url || '';
     
-    // No redirigir a login cuando estamos verificando auth (soporta /auth/me/ y /api/auth/me/)
-    if (url.includes('/auth/me/')) {
+    // No redirigir a login cuando estamos verificando auth
+    if (url.includes('/auth/me/') || url.includes('/auth/login/')) {
       return Promise.reject(error);
     }
     
-    if (error.response?.status === 401) {
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    // Si es 401 y no hemos reintentado ya
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise(function(resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        }).then(() => {
+          return api(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Intentar refrescar el token
+        await api.post('/auth/refresh/');
+        processQueue(null, 'refreshed');
+        
+        // Reintentar la petición original
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        // Si falla el refresh, desloguear
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
+    
     return Promise.reject(error);
   }
 );

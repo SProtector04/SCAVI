@@ -13,19 +13,34 @@ class JWTCookieAuthentication(JWTAuthentication):
     """
     
     def authenticate(self, request):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         # Try to get access token from cookie
         access_token = request.COOKIES.get('access_token')
         
+        logger.info(f"[JWTCookieAuth] COOKIES received: {request.COOKIES.keys()}")
+        
         if access_token is None:
+            logger.info("[JWTCookieAuth] No access_token cookie found.")
             return None  # No token, let other auth methods try
         
         # Validate the token
-        validated_token = self.get_validated_token(access_token)
+        try:
+            validated_token = self.get_validated_token(access_token)
+        except InvalidToken as e:
+            logger.warning(f"[JWTCookieAuth] InvalidToken: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"[JWTCookieAuth] Exception validating token: {e}")
+            raise
         
         # Get user from token
         try:
             user = self.get_user(validated_token)
+            logger.info(f"[JWTCookieAuth] Authenticated user: {user.username}")
         except User.DoesNotExist:
+            logger.warning("[JWTCookieAuth] User from token does not exist.")
             raise AuthenticationFailed(_('User not found'))
         
         return (user, validated_token)
