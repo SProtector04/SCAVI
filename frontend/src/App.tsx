@@ -1,6 +1,6 @@
 // src/App.tsx
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Navigate, Routes, Route, useNavigate, useLocation, Outlet } from "react-router-dom";
 import api from "./api/axios";
 import Footer from "./components/Footer";
 import DashboardPage from "./pages/DashboardPage";
@@ -39,28 +39,34 @@ const PROTECTED_ROUTES = [
   "/settings",
 ];
 
+// Rutas que solo ADMIN puede acceder
+const ADMIN_ONLY_ROUTES = ["/users", "/users-management", "/settings"];
+
 // Hook personalizado para verificar autenticación
 function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const checkedRef = useRef(false);
 
   const checkAuth = useCallback(async () => {
     if (checkedRef.current) return;
-    
+
     try {
       const response = await api.get("/auth/me/");
       if (response.status === 200) {
         localStorage.setItem("user", JSON.stringify(response.data));
         setIsAuthenticated(true);
         checkedRef.current = true;
+        setIsLoading(false);
         return;
       }
     } catch {
       localStorage.removeItem("user");
     }
-    
+
     setIsAuthenticated(false);
     checkedRef.current = true;
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -91,7 +97,7 @@ function useAuth() {
     }
   }, []);
 
-  return { isAuthenticated, logout, getUserRole };
+  return { isAuthenticated, isLoading, logout, getUserRole, checkedAuth: checkedRef.current };
 }
 
 function PlaceholderPage({ title }: { title: string }) {
@@ -105,66 +111,12 @@ function PlaceholderPage({ title }: { title: string }) {
   );
 }
 
-function App() {
-  const navigate = useNavigate();
+// Componente para rutas protegidas
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, getUserRole } = useAuth();
   const location = useLocation();
-  const { isAuthenticated, logout, getUserRole } = useAuth();
 
-  // Exponer logout en window para que la sidebar pueda llamarlo
-  useEffect(() => {
-    window.logout = logout;
-    return () => {
-      delete window.logout;
-    };
-  }, [logout]);
-
-  // Verificar autenticación y redirigir según la ruta actual
-  useEffect(() => {
-    const currentPath = location.pathname;
-
-    // Rutas que solo ADMIN puede acceder
-    const adminOnlyRoutes = ["/users", "/users-management", "/settings"];
-    
-    // Si está en ruta de admin y no es admin, redirigir a dashboard
-    if (adminOnlyRoutes.includes(currentPath)) {
-      const role = getUserRole();
-      if (role !== "ADMIN") {
-        navigate("/dashboard", { replace: true });
-        return;
-      }
-    }
-
-    // Si está en ruta protegida y NO está autenticado, redirigir a login
-    if (PROTECTED_ROUTES.includes(currentPath) && isAuthenticated === false) {
-      navigate("/login", { replace: true });
-      return;
-    }
-    
-    // Mientras verifica (isAuthenticated === null), no hacer nada
-    if (isAuthenticated === null) {
-      return;
-    }
-
-    // Si está en /login y ya está autenticado, redirigir a dashboard
-    if (currentPath === "/login" && isAuthenticated) {
-      navigate("/dashboard", { replace: true });
-      return;
-    }
-    
-    // Si está en / (raíz) y NO está autenticado, mostrar landing
-    if (currentPath === "/" && !isAuthenticated) {
-      return;
-    }
-
-    // Si está en / (raíz) y está autenticado, ir a dashboard
-    if (currentPath === "/" && isAuthenticated) {
-      navigate("/dashboard", { replace: true });
-      return;
-    }
-  }, [location.pathname, isAuthenticated, navigate, getUserRole]);
-
-  // Mostrar loading mientras se verifica autenticación
-  if (isAuthenticated === null) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f7f7f7]">
         <div className="text-center">
@@ -175,104 +127,216 @@ function App() {
     );
   }
 
-  // Si es ruta de login, solo mostrar el componente de login (sin Layout/Footer)
-  if (location.pathname === "/login") {
-    return <LoginPage />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Si está en / (raíz) y NO está autenticado, mostrar landing
-  if (location.pathname === "/" && !isAuthenticated) {
-    return <Landing />;
+  // Verificar si es ruta de admin
+  const currentPath = location.pathname;
+  if (ADMIN_ONLY_ROUTES.includes(currentPath)) {
+    const role = getUserRole();
+    if (role !== "ADMIN") {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
-  // Rutas protegidas necesitan autenticación
-  const isProtectedRoute = PROTECTED_ROUTES.includes(location.pathname);
+  return <>{children}</>;
+}
 
-  if (isProtectedRoute && !isAuthenticated) {
+// Layout envuelto para rutas protegidas
+function ProtectedLayout() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Exponer logout en window para que la sidebar pueda llamarlo
+  useEffect(() => {
+    window.logout = logout;
+    return () => {
+      delete window.logout;
+    };
+  }, [logout]);
+
+  return (
+    <div className="flex flex-col min-h-screen bg-[#f7f7f7]">
+      <Layout>
+        <Outlet />
+      </Layout>
+      <Footer />
+    </div>
+  );
+}
+
+function App() {
+  const { isAuthenticated, isLoading, logout, getUserRole } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Exponer logout globalmente
+  useEffect(() => {
+    window.logout = logout;
+    return () => {
+      delete window.logout;
+    };
+  }, [logout]);
+
+  // Manejar redirecciones iniciales basadas en autenticación
+  useEffect(() => {
+    if (isLoading) return;
+
+    const currentPath = location.pathname;
+
+    // Si está en / y está autenticado, ir a dashboard
+    if (currentPath === "/" && isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+
+    // Si está en /login y ya está autenticado, ir a dashboard
+    if (currentPath === "/login" && isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+  }, [isLoading, isAuthenticated, location.pathname, navigate]);
+
+  // Mostrar loading mientras se verifica autenticación
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f7f7f7]">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-800 border-t-transparent"></div>
-          <p className="mt-2 text-slate-600">Redirigiendo a login...</p>
+          <p className="mt-2 text-slate-600">Verificando sesión...</p>
         </div>
       </div>
     );
   }
 
-  // Renderizar según la ruta
-  const resolvePage = (pathname: string) => {
-    if (pathname === "/dashboard") {
-      return <DashboardPage />;
-    }
-
-    if (pathname === "/users") {
-      return <UsersPage />;
-    }
-
-    if (pathname === "/users-management") {
-      return <UsersMan />;
-    }
-
-    if (pathname === "/vehicle-management") {
-      return <VehicleMan />;
-    }
-
-    if (pathname === "/history") {
-      return <HistoryPage />;
-    }
-
-    if (pathname === "/contact-us") {
-      return <ContactUs />;
-    }
-
-    if (pathname === "/perfil" || pathname === "/profile") {
-      return <ProfilePage />;
-    }
-
-    if (pathname === "/settings") {
-      return <SettingsPage />;
-    }
-
-    if (pathname === "/alerts") {
-      return <AlertsPage />;
-    }
-
-    if (PAGE_TITLES[pathname]) {
-      return <PlaceholderPage title={PAGE_TITLES[pathname]} />;
-    }
-
-    // Ruta desconocida - redirigir a login
-    return null;
-  };
-
-  // Si es ruta protegida, envolver en Layout
-  if (isProtectedRoute) {
-    const pageContent = resolvePage(location.pathname);
-    
-    // Si no hay contenido para esta ruta, redirigir a login
-    if (!pageContent) {
-      if (!isAuthenticated) {
-        window.location.href = "/login";
-        return null;
-      }
-    }
-    
-    return (
-      <div className="flex flex-col min-h-screen bg-[#f7f7f7]">
-        <Layout>
-          {pageContent}
-        </Layout>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Para otras rutas
   return (
-    <div className="flex flex-col min-h-screen bg-[#f7f7f7]">
-      <main className="flex-grow">{resolvePage(location.pathname)}</main>
-      <Footer />
-    </div>
+    <Routes>
+      {/* Ruta raíz - muestra Landing si no está autenticado */}
+      <Route
+        path="/"
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Landing />
+        }
+      />
+
+      {/* Ruta de login - sin layout */}
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
+        }
+      />
+
+      {/* Rutas protegidas con layout */}
+      <Route element={<ProtectedLayout />}>
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/users-management"
+          element={
+            <ProtectedRoute>
+              <UsersMan />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vehicle-management"
+          element={
+            <ProtectedRoute>
+              <VehicleMan />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <HistoryPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/contact-us"
+          element={
+            <ProtectedRoute>
+              <ContactUs />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/perfil"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/alerts"
+          element={
+            <ProtectedRoute>
+              <AlertsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rutas con placeholder temporal */}
+        {Object.entries(PAGE_TITLES).map(([path, title]) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <ProtectedRoute>
+                <PlaceholderPage title={title} />
+              </ProtectedRoute>
+            }
+          />
+        ))}
+      </Route>
+
+      {/* Ruta por defecto - redirigir a login */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
 
