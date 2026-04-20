@@ -155,14 +155,15 @@ function App() {
       return;
     }
     
-    // Si está en / (raíz) y NO está autenticado, mostrar landing
+    // Si está en / (raíz) y NO está autenticado, no hacer nada (se renderiza landing)
     if (currentPath === "/" && !isAuthenticated) {
       return;
     }
 
-    // Si está en / (raíz) y está autenticado, ir a dashboard
+    // Si está en / (raíz) y está autenticado, no hacer nada (se renderiza landing) o ir a dashboard?
+    // El usuario quiere ver la landing primero.
     if (currentPath === "/" && isAuthenticated) {
-      navigate("/dashboard", { replace: true });
+      // Remover la redirección automática a dashboard para que pueda ver la Landing
       return;
     }
   }, [location.pathname, isAuthenticated, navigate, getUserRole]);
@@ -184,8 +185,8 @@ function App() {
     return <LoginPage />;
   }
 
-  // Si está en / (raíz) y NO está autenticado, mostrar landing
-  if (location.pathname === "/" && !isAuthenticated) {
+  // Si está en / (raíz) mostrar siempre la landing page (sin importar si está autenticado o no, según lo pedido)
+  if (location.pathname === "/") {
     return <Landing />;
   }
 
