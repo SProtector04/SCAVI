@@ -48,6 +48,11 @@ function WebcamCapture() {
     }
     setIsStreaming(false)
     setStreamActive(false)
+    setDetections([])
+    if (overlayCanvasRef.current) {
+      const ctx = overlayCanvasRef.current.getContext("2d")
+      if (ctx) ctx.clearRect(0, 0, overlayCanvasRef.current.width, overlayCanvasRef.current.height)
+    }
   }, [])
 
   useEffect(() => {
