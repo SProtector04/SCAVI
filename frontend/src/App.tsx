@@ -40,7 +40,7 @@ const PROTECTED_ROUTES = [
 ];
 
 // Rutas que solo ADMIN puede acceder
-const ADMIN_ONLY_ROUTES = ["/users", "/users-management", "/settings"];
+const ADMIN_ONLY_ROUTES = ["/settings"];
 
 // Hook personalizado para verificar autenticación
 function useAuth() {
