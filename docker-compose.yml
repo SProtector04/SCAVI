@@ -26,7 +26,7 @@ services:
     # Ejecuta el comando en background. 0 es para cámaras USB pasadas al docker (difícil sin devices), 
     # pero aquí podemos configurar un RTSP por defecto o hacer que el script lea la BD luego.
     command: >
-      sh -c "sleep 10 && python manage.py run_camera_stream --url 0"
+      sh -c "sleep 10 && python manage.py run_camera_stream --url /app/models/video_prueba.mp4"
     networks:
       - backend
     depends_on:

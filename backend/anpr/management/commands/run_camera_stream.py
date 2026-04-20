@@ -31,8 +31,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--url',
             type=str,
-            default='0',
-            help='RTSP URL or camera index (default: 0 for local webcam)'
+            default='/app/models/video_prueba.mp4',
+            help='RTSP URL, camera index or video file path'
         )
         parser.add_argument(
             '--confidence',
@@ -60,7 +60,7 @@ class Command(BaseCommand):
             source = int(source)
             self.stdout.write(f"Opening local camera index {source}")
         else:
-            self.stdout.write(f"Opening RTSP stream: {source}")
+            self.stdout.write(f"Opening video source: {source}")
 
         self.stdout.write(self.style.SUCCESS('Starting YOLO stream processor'))
         self._run_stream(source, confidence_threshold, interval)

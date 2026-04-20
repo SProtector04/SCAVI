@@ -85,7 +85,7 @@ class PlateDetectionViewSet(viewsets.ModelViewSet):
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsAdmin])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsSupervisorOrAdmin])
     def detect(self, request):
         """
         POST /api/anpr/detect/
@@ -171,6 +171,30 @@ class PlateDetectionViewSet(viewsets.ModelViewSet):
             device_id=device_id,
             is_active=True
         )
+
+        try:
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
+            channel_layer = get_channel_layer()
+            if channel_layer:
+                async_to_sync(channel_layer.group_send)(
+                    "scavi_realtime",
+                    {
+                        "type": "chat_message",
+                        "message": {
+                            "type": "PLACA_DETECTADA",
+                            "data": {
+                                "placa": plate_text,
+                                "registro_id": event.id,
+                                "camara": device_id or "WEB_UPLOAD",
+                                "confianza": confidence,
+                                "bbox": primary.get("bbox") if 'primary' in locals() else None
+                            }
+                        }
+                    }
+                )
+        except Exception as e:
+            logger.error(f"WebSocket broadcast failed: {e}")
 
         return Response({
             'event_id': event.id,

@@ -3,9 +3,11 @@ import { Camera, CameraOff, Search, Loader2 } from "lucide-react"
 import api from "../api/axios"
 
 interface DetectionResult {
-  text: string
+  plate_text?: string
+  text?: string
   confidence: number
   bbox?: [number, number, number, number]
+  class_name?: string
   class?: string
 }
 
@@ -68,7 +70,7 @@ function WebcamCapture() {
         
         ctx.fillStyle = "#22c55e"
         ctx.font = "bold 14px sans-serif"
-        ctx.fillText(`${det.text} (${(det.confidence * 100).toFixed(0)}%)`, x1, y1 - 8)
+        ctx.fillText(`${det.plate_text || det.text || det.class_name || det.class} (${(det.confidence * 100).toFixed(0)}%)`, x1, y1 - 8)
       }
     })
   }, [])
@@ -111,7 +113,7 @@ function WebcamCapture() {
       formData.append("image", blob, "capture.jpg")
 
       try {
-        const response = await api.post("/anpr/detect/", formData, {
+        const response = await api.post("anpr/events/detect/", formData, {
           headers: { "Content-Type": "multipart/form-data" }
         })
 
@@ -220,15 +222,15 @@ function WebcamCapture() {
               >
                 <div className="flex items-center justify-between">
                   <span className="font-mono font-bold text-foreground">
-                    {det.text}
+                    {det.plate_text || det.text || "Detección"}
                   </span>
                   <span className="text-sm font-medium text-green-600">
                     {(det.confidence * 100).toFixed(0)}%
                   </span>
                 </div>
-                {det.class && (
+                {(det.class_name || det.class) && (
                   <p className="text-xs text-muted-foreground mt-1 capitalize">
-                    {det.class}
+                    {det.class_name || det.class}
                   </p>
                 )}
               </div>

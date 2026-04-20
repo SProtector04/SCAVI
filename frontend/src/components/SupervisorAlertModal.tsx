@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import { useWebSocket, WebSocketMessage } from "../hooks/useWebSocket";
+import { useWebSocket } from "../hooks/useWebSocket";
+import type { WebSocketMessage } from "../hooks/useWebSocket";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, X, Check, CheckCircle } from "lucide-react";
 import api from "../api/axios";

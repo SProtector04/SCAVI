@@ -1,5 +1,18 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
+
+class UsuarioManager(UserManager):
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('rol', 'ADMIN')
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self._create_user(username, email, password, **extra_fields)
 
 class Usuario(AbstractUser):
     ROLES = (
@@ -7,6 +20,8 @@ class Usuario(AbstractUser):
         ('SUPERVISOR', 'Supervisor'),
     )
     rol = models.CharField(max_length=20, choices=ROLES, default='SUPERVISOR')
+
+    objects = UsuarioManager()
 
     def __str__(self):
         return f"{self.username} - {self.rol}"
