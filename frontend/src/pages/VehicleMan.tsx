@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search } from "lucide-react"
-import api from "../api/axios"
+import { useVehicles, useCreateVehicle, useUpdateVehicle, useDeleteVehicle, type Vehiculo } from "../hooks/useVehicles"
 import { VehicleTable, VehicleFormModal } from "@/components/vehicles"
 
-interface Vehiculo {
-  placa: string
-  tipo: string
-}
-
 function VehicleMan() {
-  const [vehiculos, setVehiculos] = useState<Vehiculo[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  const { data: vehiculos = [], isLoading: loading, error } = useVehicles()
+  const createVehicle = useCreateVehicle()
+  const updateVehicle = useUpdateVehicle()
+  const deleteVehicle = useDeleteVehicle()
+
   const [searchTerm, setSearchTerm] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingVehiculo, setEditingVehiculo] = useState<Vehiculo | null>(null)
@@ -22,24 +19,7 @@ function VehicleMan() {
     tipo: "DOCENTE",
   })
 
-  useEffect(() => {
-    const fetchVehiculos = async () => {
-      try {
-        const response = await api.get("/vehiculos/")
-        const data = response.data
-        const vehiculosArray = Array.isArray(data) ? data : (data.results || [])
-        setVehiculos(vehiculosArray)
-      } catch (err) {
-        console.error("Error fetching vehiculos:", err)
-        setError("No se pudieron cargar los vehículos")
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchVehiculos()
-  }, [])
-
-  const filteredVehiculos = vehiculos.filter((v) => {
+  const filteredVehiculos = (vehiculos || []).filter((v) => {
     const search = searchTerm.toLowerCase()
     return (
       v.placa?.toLowerCase().includes(search) ||
@@ -72,11 +52,9 @@ function VehicleMan() {
   const handleSave = async () => {
     try {
       if (editingVehiculo) {
-        await api.put(`/vehiculos/${formData.placa}/`, formData)
-        setVehiculos(vehiculos.map((v) => (v.placa === editingVehiculo.placa ? formData : v)))
+        await updateVehicle.mutateAsync({ placa: formData.placa, data: formData })
       } else {
-        const response = await api.post("/vehiculos/", formData)
-        setVehiculos([...vehiculos, response.data])
+        await createVehicle.mutateAsync(formData)
       }
       closeModal()
     } catch (err) {
@@ -88,8 +66,7 @@ function VehicleMan() {
   const handleDelete = async (placa: string) => {
     if (!confirm(`¿Está seguro de que desea eliminar el vehículo ${placa}?`)) return
     try {
-      await api.delete(`/vehiculos/${placa}/`)
-      setVehiculos(vehiculos.filter((v) => v.placa !== placa))
+      await deleteVehicle.mutateAsync(placa)
     } catch (err) {
       console.error("Error deleting vehiculo:", err)
       alert("Error al eliminar el vehículo")
@@ -121,6 +98,8 @@ function VehicleMan() {
     return colors[tipo] || "bg-muted text-muted-foreground"
   }
 
+  const displayError = error ? "No se pudieron cargar los vehículos" : ""
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -134,9 +113,9 @@ function VehicleMan() {
         </Button>
       </div>
 
-      {error && (
+      {displayError && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
-          {error}
+          {displayError}
         </div>
       )}
 
