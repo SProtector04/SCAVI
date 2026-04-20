@@ -18,7 +18,7 @@ class VehiculoViewSet(viewsets.ModelViewSet):
     - Read: any authenticated user (ADMIN or SUPERVISOR)
     - Write: only ADMIN
     """
-    queryset = Vehiculo.objects.all()
+    queryset = Vehiculo.objects.prefetch_related('tipos')
     serializer_class = VehiculoSerializer
     permission_classes = [IsSupervisorOrAdmin]
 
@@ -29,7 +29,7 @@ class RegistroAccesoViewSet(viewsets.ModelViewSet):
     - Read: any authenticated user (ADMIN or SUPERVISOR)
     - Write: only ADMIN
     """
-    queryset = RegistroAcceso.objects.all()
+    queryset = RegistroAcceso.objects.select_related('vehiculo', 'camara').prefetch_related('logs_deteccion')
     serializer_class = RegistroAccesoSerializer
     permission_classes = [IsSupervisorOrAdmin]
 
