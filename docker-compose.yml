@@ -1,5 +1,40 @@
 name: Proyecto Final ProWeb
 services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  yolo-engine:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: development
+    image: proweb-api:${APP_VERSION:-latest}
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./backend:/app
+    # Ejecuta el comando en background. 0 es para cámaras USB pasadas al docker (difícil sin devices), 
+    # pero aquí podemos configurar un RTSP por defecto o hacer que el script lea la BD luego.
+    command: >
+      sh -c "sleep 10 && python manage.py run_camera_stream --url 0"
+    networks:
+      - backend
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   api:
     build:
       context: .
