@@ -111,84 +111,24 @@ class PlateDetectionViewSet(viewsets.ModelViewSet):
         
         device_id = request.data.get('device_id', '')
         
-        # Import services
-        from anpr.services.yolo_detector import get_detector
-        from anpr.services.ocr_reader import get_reader
+        # TODO: Mover procesamiento a Celery/Background Worker para evitar bloqueo síncrono
+        from anpr.services.pipeline import process_image_pipeline
         
-        # Get services
-        yolo_detector = get_detector()
-        ocr_reader = get_reader()
-        
-        # Fallback response if services unavailable
-        detections = []
-        
-        if yolo_detector and yolo_detector.is_available():
-            try:
-                # Save uploaded image temporarily
-                import tempfile
-                import os
-                from django.conf import settings
-                
-                # Create temp file
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp:
-                    for chunk in image_file.chunks():
-                        tmp.write(chunk)
-                    temp_path = tmp.name
-                
-                try:
-                    # Run YOLO detection
-                    vehicle_detections = yolo_detector.detect_plates(temp_path)
-                    
-                    # For each detected vehicle, try OCR
-                    for det in vehicle_detections:
-                        bbox = det.get('bbox')
-                        
-                        if ocr_reader and ocr_reader.is_available():
-                            result = ocr_reader.read_plate(temp_path, bbox)
-                            text = result['text']
-                            conf = result['confidence']
-                        else:
-                            # Fallback: mock detection
-                            text = "SAMPLE_PLATE"
-                            conf = 0.75
-                        
-                        detections.append({
-                            'text': text,
-                            'confidence': conf,
-                            'bbox': bbox,
-                            'class': det.get('class_name', 'vehicle')
-                        })
-                finally:
-                    # Cleanup temp file
-                    os.unlink(temp_path)
-                    
-            except Exception as e:
-                logger.error(f"Detection failed: {e}")
-                detections = [{'text': 'DETECTION_ERROR', 'confidence': 0.0}]
-        else:
-            # Services not available - return mock response for testing
-            logger.warning("YOLO not available - returning sample response")
-            detections = [
-                {'text': 'ABC123', 'confidence': 0.85, 'bbox': [100, 200, 300, 250], 'class': 'car'}
-            ]
-        
-        # Create detection event in database
-        # Use first detection result
-        primary_detection = detections[0] if detections else {'text': 'UNKNOWN', 'confidence': 0.0}
-        
-        event = PlateDetection.objects.create(
-            imagen=image_file,
-            placa_texto=primary_detection.get('text', 'UNKNOWN'),
-            confidence=primary_detection.get('confidence', 0.0),
-            device_id=device_id,
-            is_active=True
-        )
-        
-        return Response({
-            'event_id': event.id,
-            'detections': detections,
-            'timestamp': event.created_at.isoformat()
-        })
+        try:
+            result = process_image_pipeline(image_file, device_id)
+            return Response(result)
+        except ValueError as e:
+            # Image validation failed
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Detection pipeline failed: {e}")
+            return Response(
+                {'detail': 'Detection failed. Please try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def stats(self, request):
