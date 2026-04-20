@@ -51,7 +51,7 @@ api.interceptors.response.use(
     const url = originalRequest?.url || '';
     
     // No redirigir a login cuando estamos verificando auth
-    if (url.includes('/auth/me/') || url.includes('/auth/login/')) {
+    if (url.includes('/auth/me/') || url.includes('/auth/login/') || url.includes('/auth/refresh/')) {
       return Promise.reject(error);
     }
     

@@ -30,10 +30,10 @@ class JWTCookieAuthentication(JWTAuthentication):
             validated_token = self.get_validated_token(access_token)
         except InvalidToken as e:
             logger.warning(f"[JWTCookieAuth] InvalidToken: {e}")
-            raise
+            return None
         except Exception as e:
             logger.error(f"[JWTCookieAuth] Exception validating token: {e}")
-            raise
+            return None
         
         # Get user from token
         try:
@@ -41,7 +41,7 @@ class JWTCookieAuthentication(JWTAuthentication):
             logger.info(f"[JWTCookieAuth] Authenticated user: {user.username}")
         except User.DoesNotExist:
             logger.warning("[JWTCookieAuth] User from token does not exist.")
-            raise AuthenticationFailed(_('User not found'))
+            return None
         
         return (user, validated_token)
     
