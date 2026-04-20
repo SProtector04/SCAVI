@@ -32,7 +32,7 @@ class YOLODetector:
     # Default confidence threshold for secure filtering
     DEFAULT_CONFIDENCE_THRESHOLD = 0.25
 
-    def __init__(self, model_name: str = 'yolov8n.pt', confidence_threshold: float = None):
+    def __init__(self, model_name: str = '/opt/models/yolov8n.pt', confidence_threshold: float = None):
         """
         Initialize YOLO detector.
 
