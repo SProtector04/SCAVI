@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not CV2_AVAILABLE:
-            self.stderr.write(self.style_error("OpenCV or Ultralytics not installed."))
+            self.stderr.write(self.style.ERROR("OpenCV or Ultralytics not installed."))
             return
 
         source = options['url']
@@ -72,21 +72,21 @@ class Command(BaseCommand):
         Creates LogDeteccion or Alerta records when person or vehicle detected.
         """
         try:
-            model = YOLO('yolov8n.pt')
+            model = YOLO('/opt/models/yolov8n.pt')
         except Exception as e:
-            self.stderr.write(self.style_error(f"Failed to load YOLO model: {e}"))
+            self.stderr.write(self.style.ERROR(f"Failed to load YOLO model: {e}"))
             return
 
         cap = cv2.VideoCapture(source)
 
         if not cap.isOpened():
-            self.stderr.write(self.style_error(f"Cannot open video source: {source}"))
+            self.stderr.write(self.style.ERROR(f"Cannot open video source: {source}"))
             return
 
         try:
             from trafico.models import LogDeteccion, Alerta, RegistroAcceso
         except Exception as e:
-            self.stderr.write(self.style_error(f"Cannot import trafico models: {e}"))
+            self.stderr.write(self.style.ERROR(f"Cannot import trafico models: {e}"))
             return
 
         frame_count = 0
@@ -100,7 +100,7 @@ class Command(BaseCommand):
 
                 if not ret:
                     if isinstance(source, int):
-                        self.stderr.write(self.style_error("Camera disconnected"))
+                        self.stderr.write(self.style.ERROR("Camera disconnected"))
                     else:
                         self.stdout.write("Stream ended, reconnecting...")
                         time.sleep(1)
@@ -145,10 +145,10 @@ class Command(BaseCommand):
                     continue
 
         except KeyboardInterrupt:
-            self.stdout.write(self.style_warning('\nStopping stream...'))
+            self.stdout.write(self.style.WARNING('\nStopping stream...'))
         finally:
             cap.release()
-            self.stdout.write(self.style_success('Stream closed'))
+            self.stdout.write(self.style.SUCCESS('Stream closed'))
 
     def _create_detection_record(self, class_name: str, confidence: float, bbox: list):
         """
