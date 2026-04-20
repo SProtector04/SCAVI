@@ -89,101 +89,89 @@ class PlateDetectionViewSet(viewsets.ModelViewSet):
     def detect(self, request):
         """
         POST /api/anpr/detect/
-        
+
         Detect plates in an uploaded image.
         Requires ADMIN role.
-        
+
         Request:
             - image: Image file (multipart/form-data)
             - device_id: (optional) ID of the device sending the image
-        
+
         Response:
-            - detections: List of detected plates with text and confidence
+            - detections: List of detected objects with bbox, class_name, confidence
             - event_id: ID of the created detection event
         """
         image_file = request.FILES.get('image')
-        
+
         if not image_file:
             return Response(
                 {'detail': 'No image provided. Send image as multipart/form-data.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         device_id = request.data.get('device_id', '')
-        
-        # Import services
+
         from anpr.services.yolo_detector import get_detector
         from anpr.services.ocr_reader import get_reader
-        
-        # Get services
+
         yolo_detector = get_detector()
         ocr_reader = get_reader()
-        
-        # Fallback response if services unavailable
+
         detections = []
-        
+        plate_text = 'UNKNOWN'
+        confidence = 0.0
+
         if yolo_detector and yolo_detector.is_available():
             try:
-                # Save uploaded image temporarily
-                import tempfile
-                import os
-                from django.conf import settings
-                
-                # Create temp file
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp:
-                    for chunk in image_file.chunks():
-                        tmp.write(chunk)
-                    temp_path = tmp.name
-                
-                try:
-                    # Run YOLO detection
-                    vehicle_detections = yolo_detector.detect_plates(temp_path)
-                    
-                    # For each detected vehicle, try OCR
-                    for det in vehicle_detections:
-                        bbox = det.get('bbox')
-                        
+                from PIL import Image
+                import io
+
+                image_data = image_file.read()
+                pil_image = Image.open(io.BytesIO(image_data))
+
+                yolo_detections = yolo_detector.detect(pil_image)
+
+                for det in yolo_detections:
+                    det_response = {
+                        'bbox': det['bbox'],
+                        'class_name': det['class_name'],
+                        'confidence': det['confidence']
+                    }
+
+                    if det['class_id'] in yolo_detector.VEHICLE_CLASSES:
                         if ocr_reader and ocr_reader.is_available():
-                            result = ocr_reader.read_plate(temp_path, bbox)
-                            text = result['text']
-                            conf = result['confidence']
+                            result = ocr_reader.read_plate(pil_image, det['bbox'])
+                            det_response['plate_text'] = result['text']
+                            det_response['plate_confidence'] = result['confidence']
                         else:
-                            # Fallback: mock detection
-                            text = "SAMPLE_PLATE"
-                            conf = 0.75
-                        
-                        detections.append({
-                            'text': text,
-                            'confidence': conf,
-                            'bbox': bbox,
-                            'class': det.get('class_name', 'vehicle')
-                        })
-                finally:
-                    # Cleanup temp file
-                    os.unlink(temp_path)
-                    
+                            det_response['plate_text'] = 'SAMPLE_PLATE'
+                            det_response['plate_confidence'] = 0.75
+
+                    detections.append(det_response)
+
+                primary = detections[0] if detections else {}
+                plate_text = primary.get('plate_text', 'UNKNOWN')
+                confidence = primary.get('confidence', 0.0)
+
             except Exception as e:
                 logger.error(f"Detection failed: {e}")
-                detections = [{'text': 'DETECTION_ERROR', 'confidence': 0.0}]
+                detections = [{'class_name': 'ERROR', 'confidence': 0.0, 'bbox': []}]
         else:
-            # Services not available - return mock response for testing
             logger.warning("YOLO not available - returning sample response")
             detections = [
-                {'text': 'ABC123', 'confidence': 0.85, 'bbox': [100, 200, 300, 250], 'class': 'car'}
+                {'class_name': 'car', 'confidence': 0.85, 'bbox': [100, 200, 300, 250], 'plate_text': 'ABC123', 'plate_confidence': 0.75}
             ]
-        
-        # Create detection event in database
-        # Use first detection result
-        primary_detection = detections[0] if detections else {'text': 'UNKNOWN', 'confidence': 0.0}
-        
+            plate_text = 'ABC123'
+            confidence = 0.85
+
         event = PlateDetection.objects.create(
             imagen=image_file,
-            placa_texto=primary_detection.get('text', 'UNKNOWN'),
-            confidence=primary_detection.get('confidence', 0.0),
+            placa_texto=plate_text,
+            confidence=confidence,
             device_id=device_id,
             is_active=True
         )
-        
+
         return Response({
             'event_id': event.id,
             'detections': detections,
