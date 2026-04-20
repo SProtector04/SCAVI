@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "./api/axios";
 import Footer from "./components/Footer";
+import SupervisorAlertModal from "./components/SupervisorAlertModal";
 import DashboardPage from "./pages/DashboardPage";
 import Layout from "./components/layout";
 import ProfilePage from "./pages/ProfilePage";
@@ -15,6 +16,7 @@ import LoginPage from "./pages/LoginPage";
 import Landing from "./pages/Landing";
 import SettingsPage from "./pages/SettingsPage";
 import AlertsPage from "./pages/AlertsPage";
+import CameraPage from "./pages/CameraPage";
 
 const PAGE_TITLES: Record<string, string> = {
   "/users": "Usuarios",
@@ -23,6 +25,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/history": "Historial",
   "/contact-us": "Contacto",
   "/settings": "Configuracion",
+  "/camera": "Cámara ANPR",
 };
 
 // Rutas que requieren autenticación
@@ -37,6 +40,7 @@ const PROTECTED_ROUTES = [
   "/perfil",
   "/profile",
   "/settings",
+  "/camera",
 ];
 
 // Hook personalizado para verificar autenticación
@@ -237,6 +241,10 @@ function App() {
       return <AlertsPage />;
     }
 
+    if (pathname === "/camera") {
+      return <CameraPage />;
+    }
+
     if (PAGE_TITLES[pathname]) {
       return <PlaceholderPage title={PAGE_TITLES[pathname]} />;
     }
@@ -262,6 +270,7 @@ function App() {
         <Layout>
           {pageContent}
         </Layout>
+        <SupervisorAlertModal />
         <Footer />
       </div>
     );

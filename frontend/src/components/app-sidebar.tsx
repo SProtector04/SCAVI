@@ -22,6 +22,7 @@ import {
   LogOut,
   User,
   Bell,
+  Camera,
 } from "lucide-react";
 
 const navigationItems = [
@@ -54,6 +55,11 @@ const navigationItems = [
     title: "Alertas",
     url: "/alerts",
     icon: Bell,
+  },
+  {
+    title: "Cámara ANPR",
+    url: "/camera",
+    icon: Camera,
   },
   {
     title: "Contacto",
