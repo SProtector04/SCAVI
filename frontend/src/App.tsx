@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { Navigate, Routes, Route, useNavigate, useLocation, Outlet } from "react-router-dom";
 import api from "./api/axios";
 import Footer from "./components/Footer";
+import SupervisorAlertModal from "./components/SupervisorAlertModal";
 import DashboardPage from "./pages/DashboardPage";
 import UsersPage from "./pages/UsersPage";
 import Layout from "./components/layout";
@@ -11,14 +12,15 @@ import VehicleMan from "./pages/VehicleMan";
 import HistoryPage from "./pages/HistoryPage";
 import LoginPage from "./pages/LoginPage";
 import Landing from "./pages/Landing";
-
 import AlertsPage from "./pages/AlertsPage";
+import CameraPage from "./pages/CameraPage";
 
 const PAGE_TITLES: Record<string, string> = {
   "/users": "Usuarios",
   "/users-management": "Gestion de usuarios",
   "/vehicle-management": "Gestion de vehiculos",
   "/history": "Historial",
+  "/camera": "Cámara ANPR",
 };
 
 // Rutas que requieren autenticación
@@ -31,9 +33,8 @@ const PROTECTED_ROUTES = [
   "/alerts",
   "/perfil",
   "/profile",
+  "/camera",
 ];
-
-
 
 // Hook personalizado para verificar autenticación
 function useAuth() {
@@ -124,13 +125,21 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Rutas que solo ADMIN puede acceder
+  const adminOnlyRoutes = ["/users", "/users-management", "/settings"];
+  if (adminOnlyRoutes.includes(location.pathname)) {
+    const role = getUserRole();
+    if (role !== "ADMIN") {
+      return <Navigate to="/dashboard" replace />;
+    }
+  }
+
   return <>{children}</>;
 }
 
 // Layout envuelto para rutas protegidas
 function ProtectedLayout() {
   const { logout } = useAuth();
-  const navigate = useNavigate();
 
   // Exponer logout en window para que la sidebar pueda llamarlo
   useEffect(() => {
@@ -151,7 +160,7 @@ function ProtectedLayout() {
 }
 
 function App() {
-  const { isAuthenticated, isLoading, logout, getUserRole } = useAuth();
+  const { isAuthenticated, isLoading, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -285,19 +294,34 @@ function App() {
             </ProtectedRoute>
           }
         />
+        
+        <Route
+          path="/camera"
+          element={
+            <ProtectedRoute>
+              <CameraPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Rutas con placeholder temporal */}
-        {Object.entries(PAGE_TITLES).map(([path, title]) => (
-          <Route
-            key={path}
-            path={path}
-            element={
-              <ProtectedRoute>
-                <PlaceholderPage title={title} />
-              </ProtectedRoute>
-            }
-          />
-        ))}
+        {Object.entries(PAGE_TITLES).map(([path, title]) => {
+          // Ignorar las rutas que ya tienen su propio componente
+          if (["/users", "/users-management", "/vehicle-management", "/history", "/camera"].includes(path)) {
+            return null;
+          }
+          return (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title={title} />
+                </ProtectedRoute>
+              }
+            />
+          );
+        })}
       </Route>
 
       {/* Ruta por defecto - redirigir a login */}

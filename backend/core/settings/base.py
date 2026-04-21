@@ -31,6 +31,9 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'api']
 # CORS settings for development
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1",
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
@@ -41,13 +44,16 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:80",
+    "http://localhost",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:80",
+    "http://127.0.0.1",
 ]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
