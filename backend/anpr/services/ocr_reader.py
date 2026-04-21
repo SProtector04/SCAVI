@@ -83,6 +83,11 @@ class OCRReader:
             x1, y1, x2, y2 = map(int, bbox)
             img = img[max(0, y1):y2, max(0, x1):x2]
         
+        # Task 1.1: Crop to lower half of the vehicle (where plates typically are)
+        # This removes roof, windshield, and other noise from the top half
+        height, width = img.shape[:2]
+        img = img[height // 2:, :]  # Take bottom 50% (from middle to bottom)
+        
         # Convert to grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
@@ -97,6 +102,40 @@ class OCRReader:
         thresh = cv2.medianBlur(thresh, 3)
         
         return thresh
+    
+    def _extract_best_plate_candidate(self, tokens: list) -> str:
+        """
+        Extract the best license plate candidate from OCR tokens.
+        
+        Task 1.3: From all extracted tokens, find the one that most likely
+        represents a license plate (alphanumeric, reasonable length).
+        
+        Args:
+            tokens: List of raw text tokens from OCR
+            
+        Returns:
+            Best plate candidate or empty string
+        """
+        if not tokens:
+            return ""
+        
+        # Filter tokens: keep only alphanumeric ones (remove pure symbols)
+        alphanumeric_tokens = [''.join(c for c in t if c.isalnum()) for t in tokens]
+        alphanumeric_tokens = [t for t in alphanumeric_tokens if t]  # Remove empty
+        
+        if not alphanumeric_tokens:
+            return ""
+        
+        # Find longest alphanumeric token (license plates tend to be longer than random text)
+        # Also filter to reasonable plate length (4-10 characters typical)
+        valid_candidates = [t for t in alphanumeric_tokens if 4 <= len(t) <= 10]
+        
+        if valid_candidates:
+            # Return the longest valid candidate
+            return max(valid_candidates, key=len)
+        
+        # Fallback: return longest alphanumeric token regardless of length
+        return max(alphanumeric_tokens, key=len)
     
     def read_text(self, image_path: str, bbox: list = None) -> str:
         """
@@ -116,16 +155,20 @@ class OCRReader:
             # Preprocess
             processed = self.preprocess_image(image_path, bbox)
             
-            # Configure pytesseract for license plates
-            # PSM 8: Treat image as single line of text
-            config = '--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            # Task 1.2: Use PSM 11 (Sparse text) to find disconnected text blocks
+            # This works better for large crops containing vehicle + plate + logos
+            config = '--psm 11 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
             
             # Run OCR
-            text = pytesseract.image_to_string(processed, config=config)
+            raw_text = pytesseract.image_to_string(processed, config=config)
             
-            # Clean result
+            # Task 1.3: Extract the best license plate candidate
+            # Split by whitespace/newlines and find longest alphanumeric token
+            tokens = raw_text.split()
+            text = self._extract_best_plate_candidate(tokens)
+            
+            # Final cleanup
             text = text.strip().upper()
-            text = ''.join(c for c in text if c.isalnum())  # Remove non-alphanumeric
             
             # Fallback if empty
             if not text:
