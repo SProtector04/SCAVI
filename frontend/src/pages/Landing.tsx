@@ -41,9 +41,6 @@ function Landing() {
             <a href="#beneficios" className="text-sm font-medium text-muted-foreground hover:text-foreground">
               Beneficios
             </a>
-            <a href="#contacto" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-              Contacto
-            </a>
             <Link
               to="/login"
               className="rounded-md bg-green-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
@@ -65,9 +62,6 @@ function Landing() {
             <nav className="flex flex-col gap-4">
               <a href="#beneficios" className="text-sm font-medium text-muted-foreground">
                 Beneficios
-              </a>
-              <a href="#contacto" className="text-sm font-medium text-muted-foreground">
-                Contacto
               </a>
               <Link
                 to="/login"
@@ -135,7 +129,7 @@ function Landing() {
       </section>
 
       {/* Footer */}
-      <footer id="contacto" className="border-t border-border bg-card px-4 py-12 sm:px-6 lg:px-8">
+      <footer className="border-t border-border bg-card px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <div className="flex items-center gap-2">
