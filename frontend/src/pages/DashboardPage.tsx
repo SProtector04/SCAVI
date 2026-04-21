@@ -139,11 +139,6 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground">Panel de control y métricas en tiempo real</p>
-      </div>
-
       {/* Metric Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {metricCards.map((metric) => {

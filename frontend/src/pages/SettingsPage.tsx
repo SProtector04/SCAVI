@@ -31,10 +31,6 @@ function SettingsPage() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Configuración</h1>
-          <p className="text-muted-foreground">Administra la configuración del sistema</p>
-        </div>
         <Button onClick={handleSave} className="gap-2">
           <Save className="h-4 w-4" />
           Guardar Cambios

@@ -63,11 +63,6 @@ function AlertsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Alertas del Sistema</h1>
-        <p className="text-muted-foreground">Monitorea las alertas y notificaciones del sistema</p>
-      </div>
-
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
           {error}

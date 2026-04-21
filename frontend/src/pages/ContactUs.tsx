@@ -38,11 +38,6 @@ function ContactUs() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Contacto</h1>
-        <p className="text-muted-foreground">Información para comunicación y soporte institucional</p>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Contact Form */}
         <Card className="border-border bg-card shadow-sm">

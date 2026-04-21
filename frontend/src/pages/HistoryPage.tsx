@@ -48,13 +48,6 @@ const HistoryPage = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Historial de Accesos</h1>
-        <p className="mt-2 text-slate-600">
-          Monitoreo en tiempo real de los vehículos (Autorizados, Denegados o Desconocidos).
-        </p>
-      </div>
-
       {loading && <p className="animate-pulse text-green-800 font-semibold">Cargando registros...</p>}
       {error && <p className="text-red-600 font-semibold bg-red-50 p-3 rounded-lg border border-red-200">{error}</p>}
 

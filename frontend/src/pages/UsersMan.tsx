@@ -135,10 +135,6 @@ function UsersMan() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Gestión de Usuarios</h1>
-          <p className="text-muted-foreground">Administra los usuarios registrados en el sistema</p>
-        </div>
         <Button onClick={() => openModal()} className="gap-2">
           <UserPlus className="h-4 w-4" />
           Nuevo Usuario
