@@ -24,6 +24,13 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioSerializer
     permission_classes = [IsSupervisorOrAdmin]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Supervisors can read the list but should not create/update users.
+        # Keep read access intact and enforce write restrictions at the permission layer.
+        return queryset
+
 
 class RolViewSet(viewsets.ModelViewSet):
     """
