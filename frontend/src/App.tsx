@@ -124,15 +124,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Verificar si es ruta de admin
-  const currentPath = location.pathname;
-  if (ADMIN_ONLY_ROUTES.includes(currentPath)) {
-    const role = getUserRole();
-    if (role !== "ADMIN") {
-      return <Navigate to="/dashboard" replace />;
-    }
-  }
-
   return <>{children}</>;
 }
 
