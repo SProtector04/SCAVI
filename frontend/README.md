@@ -28,7 +28,7 @@ frontend/
 │   │   ├── DashboardPage.tsx
 │   │   ├── HistoryPage.tsx
 │   │   ├── UsersPage.tsx
-│   │   ├── UsersMan.tsx
+│   │   ├── UsersPage.tsx
 │   │   ├── VehicleMan.tsx
 │   │   ├── SettingsPage.tsx
 │   │   ├── AlertsPage.tsx

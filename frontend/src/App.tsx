@@ -4,10 +4,9 @@ import { Navigate, Routes, Route, useNavigate, useLocation, Outlet } from "react
 import api from "./api/axios";
 import Footer from "./components/Footer";
 import DashboardPage from "./pages/DashboardPage";
+import UsersPage from "./pages/UsersPage";
 import Layout from "./components/layout";
 import ProfilePage from "./pages/ProfilePage";
-import UsersPage from "./pages/UsersPage";
-import UsersMan from "./pages/UsersMan";
 import VehicleMan from "./pages/VehicleMan";
 import HistoryPage from "./pages/HistoryPage";
 import ContactUs from "./pages/ContactUs";
@@ -252,7 +251,7 @@ function App() {
           path="/users-management"
           element={
             <ProtectedRoute>
-              <UsersMan />
+              <UsersPage />
             </ProtectedRoute>
           }
         />
