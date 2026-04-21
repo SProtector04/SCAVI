@@ -57,7 +57,7 @@ const HistoryPage = () => {
             <thead className="bg-slate-50 text-slate-900">
               <tr>
                 <th className="px-6 py-4 font-bold border-b border-slate-200">Placa Vehículo</th>
-                <th className="px-6 py-4 font-bold border-b border-slate-200">C��mara / Ubicación</th>
+                <th className="px-6 py-4 font-bold border-b border-slate-200">Cámara / Ubicación</th>
                 <th className="px-6 py-4 font-bold border-b border-slate-200">Fecha y Hora</th>
                 <th className="px-6 py-4 font-bold border-b border-slate-200">Estado</th>
               </tr>
