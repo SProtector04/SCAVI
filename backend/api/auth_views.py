@@ -48,6 +48,7 @@ class LoginView(views.APIView):
     POST /api/auth/login/
     Authenticates user and returns JWT in httpOnly cookies.
     """
+    authentication_classes = []
     permission_classes = [AllowAny]
     
     def post(self, request):
@@ -107,6 +108,7 @@ class RefreshView(views.APIView):
     POST /api/auth/refresh/
     Refreshes access token using refresh token from cookie.
     """
+    authentication_classes = []
     permission_classes = [AllowAny]
     
     def post(self, request):
