@@ -36,11 +36,6 @@ const navigationItems = [
     icon: Users,
   },
   {
-    title: "Gestion de usuarios",
-    url: "/users-management",
-    icon: UserCheck,
-  },
-  {
     title: "Gestion de vehiculos",
     url: "/vehicle-management",
     icon: Car,
