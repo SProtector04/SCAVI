@@ -4,16 +4,14 @@ import { Navigate, Routes, Route, useNavigate, useLocation, Outlet } from "react
 import api from "./api/axios";
 import Footer from "./components/Footer";
 import DashboardPage from "./pages/DashboardPage";
+import UsersPage from "./pages/UsersPage";
 import Layout from "./components/layout";
 import ProfilePage from "./pages/ProfilePage";
-import UsersPage from "./pages/UsersPage";
-import UsersMan from "./pages/UsersMan";
 import VehicleMan from "./pages/VehicleMan";
 import HistoryPage from "./pages/HistoryPage";
-import ContactUs from "./pages/ContactUs";
 import LoginPage from "./pages/LoginPage";
 import Landing from "./pages/Landing";
-import SettingsPage from "./pages/SettingsPage";
+
 import AlertsPage from "./pages/AlertsPage";
 
 const PAGE_TITLES: Record<string, string> = {
@@ -21,8 +19,6 @@ const PAGE_TITLES: Record<string, string> = {
   "/users-management": "Gestion de usuarios",
   "/vehicle-management": "Gestion de vehiculos",
   "/history": "Historial",
-  "/contact-us": "Contacto",
-  "/settings": "Configuracion",
 };
 
 // Rutas que requieren autenticación
@@ -33,14 +29,11 @@ const PROTECTED_ROUTES = [
   "/vehicle-management",
   "/history",
   "/alerts",
-  "/contact-us",
   "/perfil",
   "/profile",
-  "/settings",
 ];
 
-// Rutas que solo ADMIN puede acceder
-const ADMIN_ONLY_ROUTES = ["/settings"];
+
 
 // Hook personalizado para verificar autenticación
 function useAuth() {
@@ -129,15 +122,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  // Verificar si es ruta de admin
-  const currentPath = location.pathname;
-  if (ADMIN_ONLY_ROUTES.includes(currentPath)) {
-    const role = getUserRole();
-    if (role !== "ADMIN") {
-      return <Navigate to="/dashboard" replace />;
-    }
   }
 
   return <>{children}</>;
@@ -252,7 +236,7 @@ function App() {
           path="/users-management"
           element={
             <ProtectedRoute>
-              <UsersMan />
+              <UsersPage />
             </ProtectedRoute>
           }
         />
@@ -276,15 +260,6 @@ function App() {
         />
 
         <Route
-          path="/contact-us"
-          element={
-            <ProtectedRoute>
-              <ContactUs />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
           path="/perfil"
           element={
             <ProtectedRoute>
@@ -298,15 +273,6 @@ function App() {
           element={
             <ProtectedRoute>
               <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <SettingsPage />
             </ProtectedRoute>
           }
         />

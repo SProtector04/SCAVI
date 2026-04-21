@@ -97,11 +97,6 @@ function ProfilePage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Perfil</h1>
-        <p className="text-muted-foreground">Aquí podrás consultar y actualizar la información de tu cuenta</p>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Profile Card */}
         <Card className="border-border bg-card shadow-sm lg:row-span-2">

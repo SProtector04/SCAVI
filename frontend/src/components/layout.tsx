@@ -9,12 +9,9 @@ const VIEW_TITLES: Record<string, string> = {
   "/": "Dashboard",
   "/dashboard": "Dashboard",
   "/users": "Usuarios",
-  "/users-management": "Gestion de usuarios",
   "/vehicle-management": "Gestion de vehiculos",
   "/history": "Historial",
   "/alerts": "Alertas",
-  "/contact-us": "Contacto",
-  "/settings": "Configuracion",
   "/perfil": "Perfil",
   "/profile": "Perfil",
 };

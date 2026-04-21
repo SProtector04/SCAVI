@@ -17,8 +17,6 @@ import {
   UserCheck,
   Car,
   History as HistoryIcon,
-  Mail,
-  Settings,
   LogOut,
   User,
   Bell,
@@ -36,11 +34,6 @@ const navigationItems = [
     icon: Users,
   },
   {
-    title: "Gestion de usuarios",
-    url: "/users-management",
-    icon: UserCheck,
-  },
-  {
     title: "Gestion de vehiculos",
     url: "/vehicle-management",
     icon: Car,
@@ -55,20 +48,9 @@ const navigationItems = [
     url: "/alerts",
     icon: Bell,
   },
-  {
-    title: "Contacto",
-    url: "/contact-us",
-    icon: Mail,
-  },
 ];
 
-const settingsItems = [
-  {
-    title: "Configuracion",
-    url: "/settings",
-    icon: Settings,
-  },
-];
+
 
 export function AppSidebar() {
   const { setOpen, setOpenMobile } = useSidebar();
@@ -117,27 +99,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Ajustes</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild>
-                    <a
-                      href={item.url}
-                      className="flex items-center gap-3"
-                      onClick={handleNavigate}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        
       </SidebarContent>
 
       <SidebarFooter className="border-t pt-4">
