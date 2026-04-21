@@ -197,6 +197,10 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
+# ANPR Configuration
+# Path to the dedicated license plate detection model
+ANPR_PLATE_MODEL_PATH = os.environ.get('SCAVI_PLATE_MODEL_PATH', '')
+
 # Configuración de Logging
 LOGGING = {
     'version': 1,

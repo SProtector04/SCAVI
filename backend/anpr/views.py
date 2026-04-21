@@ -111,17 +111,17 @@ class PlateDetectionViewSet(viewsets.ModelViewSet):
 
         device_id = request.data.get('device_id', '')
 
-        from anpr.services.yolo_detector import get_detector
+        from anpr.services.plate_detector import get_detector
         from anpr.services.ocr_reader import get_reader
 
-        yolo_detector = get_detector()
+        plate_detector = get_detector()
         ocr_reader = get_reader()
 
         detections = []
         plate_text = 'UNKNOWN'
         confidence = 0.0
 
-        if yolo_detector and yolo_detector.is_available():
+        if plate_detector and plate_detector.is_available():
             try:
                 from PIL import Image
                 import io
@@ -129,40 +129,52 @@ class PlateDetectionViewSet(viewsets.ModelViewSet):
                 image_data = image_file.read()
                 pil_image = Image.open(io.BytesIO(image_data))
 
-                yolo_detections = yolo_detector.detect(pil_image)
+                # Detect plates directly using the dedicated plate detector
+                plate_detections = plate_detector.detect(pil_image)
 
-                for det in yolo_detections:
+                # Process only plate detections (no vehicles, no irrelevant objects)
+                for det in plate_detections:
                     det_response = {
                         'bbox': det['bbox'],
-                        'class_name': det['class_name'],
+                        'class_name': det['class_name'],  # Should be 'plate'
                         'confidence': det['confidence']
                     }
 
-                    if det['class_id'] in yolo_detector.VEHICLE_CLASSES:
-                        if ocr_reader and ocr_reader.is_available():
-                            result = ocr_reader.read_plate(pil_image, det['bbox'])
+                    # OCR reads the plate crop directly (not vehicle crop)
+                    if ocr_reader and ocr_reader.is_available():
+                        # Save temp file for OCR processing
+                        import tempfile
+
+                        # Save the full image temporarily
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp:
+                            pil_image.save(tmp.name)
+                            # OCR reader receives image path + bbox for cropping
+                            result = ocr_reader.read_plate(tmp.name, det['bbox'])
                             det_response['plate_text'] = result['text']
                             det_response['plate_confidence'] = result['confidence']
-                        else:
-                            det_response['plate_text'] = 'SAMPLE_PLATE'
-                            det_response['plate_confidence'] = 0.75
+                            import os
+                            os.unlink(tmp.name)
+                    else:
+                        # Fallback when OCR is unavailable
+                        det_response['plate_text'] = 'OCR_UNAVAILABLE'
+                        det_response['plate_confidence'] = 0.0
 
                     detections.append(det_response)
 
+                # Get primary detection for event
                 primary = detections[0] if detections else {}
                 plate_text = primary.get('plate_text', 'UNKNOWN')
                 confidence = primary.get('confidence', 0.0)
 
             except Exception as e:
-                logger.error(f"Detection failed: {e}")
+                logger.error(f"Plate detection failed: {e}")
                 detections = [{'class_name': 'ERROR', 'confidence': 0.0, 'bbox': []}]
         else:
-            logger.warning("YOLO not available - returning sample response")
-            detections = [
-                {'class_name': 'car', 'confidence': 0.85, 'bbox': [100, 200, 300, 250], 'plate_text': 'ABC123', 'plate_confidence': 0.75}
-            ]
-            plate_text = 'ABC123'
-            confidence = 0.85
+            logger.warning("Plate detector not available - returning empty response")
+            # Return empty detections - no fake plates
+            detections = []
+            plate_text = 'UNKNOWN'
+            confidence = 0.0
 
         event = PlateDetection.objects.create(
             imagen=image_file,
