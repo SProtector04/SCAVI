@@ -9,7 +9,6 @@ import Layout from "./components/layout";
 import ProfilePage from "./pages/ProfilePage";
 import VehicleMan from "./pages/VehicleMan";
 import HistoryPage from "./pages/HistoryPage";
-import ContactUs from "./pages/ContactUs";
 import LoginPage from "./pages/LoginPage";
 import Landing from "./pages/Landing";
 import SettingsPage from "./pages/SettingsPage";
@@ -20,7 +19,6 @@ const PAGE_TITLES: Record<string, string> = {
   "/users-management": "Gestion de usuarios",
   "/vehicle-management": "Gestion de vehiculos",
   "/history": "Historial",
-  "/contact-us": "Contacto",
   "/settings": "Configuracion",
 };
 
@@ -32,7 +30,6 @@ const PROTECTED_ROUTES = [
   "/vehicle-management",
   "/history",
   "/alerts",
-  "/contact-us",
   "/perfil",
   "/profile",
   "/settings",
@@ -270,15 +267,6 @@ function App() {
           element={
             <ProtectedRoute>
               <HistoryPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/contact-us"
-          element={
-            <ProtectedRoute>
-              <ContactUs />
             </ProtectedRoute>
           }
         />

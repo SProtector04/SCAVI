@@ -17,7 +17,6 @@ import {
   UserCheck,
   Car,
   History as HistoryIcon,
-  Mail,
   Settings,
   LogOut,
   User,
@@ -49,11 +48,6 @@ const navigationItems = [
     title: "Alertas",
     url: "/alerts",
     icon: Bell,
-  },
-  {
-    title: "Contacto",
-    url: "/contact-us",
-    icon: Mail,
   },
 ];
 
