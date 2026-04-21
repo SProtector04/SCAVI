@@ -2,9 +2,8 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { User, Mail, Phone, Building, Shield, Bell, Lock, Save, CheckCircle } from "lucide-react"
+import { User, Mail, Save, CheckCircle } from "lucide-react"
 import api from "../api/axios"
 
 interface UserProfile {
@@ -22,15 +21,11 @@ function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     email: "",
-  })
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    weekly: false,
   })
 
   useEffect(() => {
@@ -44,17 +39,9 @@ function ProfilePage() {
           last_name: userData.last_name || "",
           email: userData.email || "",
         })
-      } catch {
-        const storedUser = localStorage.getItem("user")
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setProfile(userData)
-          setFormData({
-            first_name: userData.first_name || "",
-            last_name: userData.last_name || "",
-            email: userData.email || "",
-          })
-        }
+      } catch (error) {
+        console.error("Error cargando perfil:", error)
+        setErrorMsg("Error al cargar los datos del perfil desde el servidor.")
       } finally {
         setLoading(false)
       }
@@ -64,17 +51,16 @@ function ProfilePage() {
 
   const handleSave = async () => {
     setSaving(true)
+    setErrorMsg(null)
     try {
       await api.patch("/auth/me/", formData)
-      setProfile({ ...profile, ...formData })
+      setProfile({ ...profile, ...formData } as UserProfile)
       localStorage.setItem("user", JSON.stringify({ ...profile, ...formData }))
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (error) {
-      console.error("Error saving profile:", error)
-      localStorage.setItem("user", JSON.stringify({ ...profile, ...formData }))
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      console.error("Error guardando perfil:", error)
+      setErrorMsg("Error al guardar los cambios en el servidor. Intente de nuevo.")
     } finally {
       setSaving(false)
     }
@@ -90,7 +76,7 @@ function ProfilePage() {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-800 border-t-transparent"></div>
       </div>
     )
   }
@@ -101,7 +87,7 @@ function ProfilePage() {
         {/* Profile Card */}
         <Card className="border-border bg-card shadow-sm lg:row-span-2">
           <CardContent className="flex flex-col items-center p-6 text-center">
-            <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-[hsl(212,78%,27%)]">
+            <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-green-800">
               <span className="text-3xl font-bold text-white">{getInitials()}</span>
             </div>
             <h2 className="text-xl font-bold text-foreground">
@@ -160,83 +146,17 @@ function ProfilePage() {
                 />
               </div>
             </div>
+            
+            {errorMsg && (
+              <div className="rounded-md bg-red-50 p-4 text-sm text-red-600">
+                {errorMsg}
+              </div>
+            )}
+            
             <div className="flex items-center gap-2 pt-2">
-              <Button onClick={handleSave} disabled={saving}>
+              <Button onClick={handleSave} disabled={saving} className="bg-green-800 hover:bg-green-900 text-white">
                 {saved ? <CheckCircle className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
-                {saving ? "Guardando..." : saved ? "Guardado" : "Guardar Cambios"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Notifications */}
-        <Card className="border-border bg-card shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
-              <Bell className="h-5 w-5" />
-              Notificaciones
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="text-sm font-medium text-foreground">Alertas por correo</label>
-                <p className="text-xs text-muted-foreground">Recibir alertas de seguridad en tu correo</p>
-              </div>
-              <Switch
-                checked={notifications.email}
-                onCheckedChange={(checked) => setNotifications({ ...notifications, email: checked })}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="text-sm font-medium text-foreground">Notificaciones push</label>
-                <p className="text-xs text-muted-foreground">Mostrar alertas instantáneas en el panel</p>
-              </div>
-              <Switch
-                checked={notifications.push}
-                onCheckedChange={(checked) => setNotifications({ ...notifications, push: checked })}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="text-sm font-medium text-foreground">Resumen diario</label>
-                <p className="text-xs text-muted-foreground">Enviar reporte diario de actividad</p>
-              </div>
-              <Switch
-                checked={notifications.weekly}
-                onCheckedChange={(checked) => setNotifications({ ...notifications, weekly: checked })}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Security */}
-        <Card className="border-border bg-card shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
-              <Shield className="h-5 w-5" />
-              Seguridad
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="text-sm font-medium text-foreground">Cambiar contraseña</label>
-                <p className="text-xs text-muted-foreground">Último cambio: hace 30 días</p>
-              </div>
-              <Button variant="outline" size="sm">
-                <Lock className="mr-2 h-4 w-4" />
-                Cambiar
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="text-sm font-medium text-foreground">Autenticación de dos factores</label>
-                <p className="text-xs text-muted-foreground">Añade una capa extra de seguridad</p>
-              </div>
-              <Button variant="outline" size="sm">
-                Activar
+                {saving ? "Guardando..." : saved ? "Guardado con éxito" : "Guardar Cambios"}
               </Button>
             </div>
           </CardContent>
