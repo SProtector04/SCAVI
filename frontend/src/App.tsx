@@ -11,7 +11,7 @@ import VehicleMan from "./pages/VehicleMan";
 import HistoryPage from "./pages/HistoryPage";
 import LoginPage from "./pages/LoginPage";
 import Landing from "./pages/Landing";
-import SettingsPage from "./pages/SettingsPage";
+
 import AlertsPage from "./pages/AlertsPage";
 
 const PAGE_TITLES: Record<string, string> = {
@@ -19,7 +19,6 @@ const PAGE_TITLES: Record<string, string> = {
   "/users-management": "Gestion de usuarios",
   "/vehicle-management": "Gestion de vehiculos",
   "/history": "Historial",
-  "/settings": "Configuracion",
 };
 
 // Rutas que requieren autenticación
@@ -32,11 +31,9 @@ const PROTECTED_ROUTES = [
   "/alerts",
   "/perfil",
   "/profile",
-  "/settings",
 ];
 
-// Rutas que solo ADMIN puede acceder
-const ADMIN_ONLY_ROUTES = ["/settings"];
+
 
 // Hook personalizado para verificar autenticación
 function useAuth() {
@@ -285,15 +282,6 @@ function App() {
           element={
             <ProtectedRoute>
               <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <SettingsPage />
             </ProtectedRoute>
           }
         />

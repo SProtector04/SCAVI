@@ -17,7 +17,6 @@ import {
   UserCheck,
   Car,
   History as HistoryIcon,
-  Settings,
   LogOut,
   User,
   Bell,
@@ -51,13 +50,7 @@ const navigationItems = [
   },
 ];
 
-const settingsItems = [
-  {
-    title: "Configuracion",
-    url: "/settings",
-    icon: Settings,
-  },
-];
+
 
 export function AppSidebar() {
   const { setOpen, setOpenMobile } = useSidebar();
@@ -106,27 +99,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Ajustes</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild>
-                    <a
-                      href={item.url}
-                      className="flex items-center gap-3"
-                      onClick={handleNavigate}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        
       </SidebarContent>
 
       <SidebarFooter className="border-t pt-4">
