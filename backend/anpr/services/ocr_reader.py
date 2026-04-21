@@ -78,15 +78,16 @@ class OCRReader:
         if img is None:
             raise ValueError(f"Could not read image: {image_path}")
         
-        # Crop to bbox if provided
+        # Crop to bbox if provided.
+        # When bbox already represents a plate, avoid any additional crop.
         if bbox:
             x1, y1, x2, y2 = map(int, bbox)
             img = img[max(0, y1):y2, max(0, x1):x2]
-        
-        # Task 1.1: Crop to lower half of the vehicle (where plates typically are)
-        # This removes roof, windshield, and other noise from the top half
-        height, width = img.shape[:2]
-        img = img[height // 2:, :]  # Take bottom 50% (from middle to bottom)
+        else:
+            # If no bbox is provided, bias OCR toward the lower half of the frame.
+            # This keeps a fallback path for full-frame inputs without truncating plates.
+            height, width = img.shape[:2]
+            img = img[height // 2:, :]
         
         # Convert to grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

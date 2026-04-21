@@ -74,7 +74,7 @@ def process_image_pipeline(image_file, device_id=''):
     """
     from PIL import Image
     
-    from anpr.services.yolo_detector import get_detector
+    from anpr.services.plate_detector import get_detector
     from anpr.services.ocr_reader import get_reader
     from anpr.models import PlateDetection
     
@@ -82,48 +82,47 @@ def process_image_pipeline(image_file, device_id=''):
     validate_image(image_file)
     
     # Get services
-    yolo_detector = get_detector()
+    plate_detector = get_detector()
     ocr_reader = get_reader()
     
     # Process detections
     detections = []
     
-    # Create temp file for YOLO processing
+    # Create temp file for plate detection processing
     with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp:
         for chunk in image_file.chunks():
             tmp.write(chunk)
         temp_path = tmp.name
     
     try:
-        if yolo_detector and yolo_detector.is_available():
-            # Run YOLO detection
-            vehicle_detections = yolo_detector.detect_plates(temp_path)
+        if plate_detector and plate_detector.is_available():
+            # Run plate detection directly
+            plate_detections = plate_detector.detect(temp_path)
             
-            # For each detected vehicle, try OCR
-            for det in vehicle_detections:
+            # For each detected plate, run OCR on the plate crop
+            for det in plate_detections:
                 bbox = det.get('bbox')
                 
                 if ocr_reader and ocr_reader.is_available():
+                    # OCR reads the cropped plate (not vehicle)
                     result = ocr_reader.read_plate(temp_path, bbox)
                     text = result['text']
                     conf = result['confidence']
                 else:
-                    # Fallback: mock detection
-                    text = "SAMPLE_PLATE"
-                    conf = 0.75
+                    # No OCR available -> keep the detection but do not invent a plate
+                    text = "UNKNOWN"
+                    conf = 0.0
                 
                 detections.append({
                     'text': text,
                     'confidence': conf,
                     'bbox': bbox,
-                    'class': det.get('class_name', 'vehicle')
+                    'class': det.get('class_name', 'plate')
                 })
         else:
-            # Services not available - return mock response for testing
-            logger.warning("YOLO not available - returning sample response")
-            detections = [
-                {'text': 'ABC123', 'confidence': 0.85, 'bbox': [100, 200, 300, 250], 'class': 'car'}
-            ]
+            # Plate detector not available - return empty (no mock plates)
+            logger.warning("Plate detector not available - returning empty response")
+            detections = []
     finally:
         # Cleanup temp file
         if os.path.exists(temp_path):
