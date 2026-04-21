@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Car, Plus, Search, Edit, Trash2, X, Check } from "lucide-react"
-import api from "../api/axios"
-
-interface Vehiculo {
-  placa: string
-  tipo: string
-}
+import { Plus, Search } from "lucide-react"
+import { useVehicles, useCreateVehicle, useUpdateVehicle, useDeleteVehicle, type Vehiculo } from "../hooks/useVehicles"
+import { VehicleTable, VehicleFormModal } from "@/components/vehicles"
 
 function VehicleMan() {
-  const [vehiculos, setVehiculos] = useState<Vehiculo[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  const { data: vehiculos = [], isLoading: loading, error } = useVehicles()
+  const createVehicle = useCreateVehicle()
+  const updateVehicle = useUpdateVehicle()
+  const deleteVehicle = useDeleteVehicle()
+
   const [searchTerm, setSearchTerm] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingVehiculo, setEditingVehiculo] = useState<Vehiculo | null>(null)
@@ -22,24 +19,7 @@ function VehicleMan() {
     tipo: "DOCENTE",
   })
 
-  useEffect(() => {
-    const fetchVehiculos = async () => {
-      try {
-        const response = await api.get("/vehiculos/")
-        const data = response.data
-        const vehiculosArray = Array.isArray(data) ? data : (data.results || [])
-        setVehiculos(vehiculosArray)
-      } catch (err) {
-        console.error("Error fetching vehiculos:", err)
-        setError("No se pudieron cargar los vehículos")
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchVehiculos()
-  }, [])
-
-  const filteredVehiculos = vehiculos.filter((v) => {
+  const filteredVehiculos = (vehiculos || []).filter((v) => {
     const search = searchTerm.toLowerCase()
     return (
       v.placa?.toLowerCase().includes(search) ||
@@ -72,11 +52,9 @@ function VehicleMan() {
   const handleSave = async () => {
     try {
       if (editingVehiculo) {
-        await api.put(`/vehiculos/${formData.placa}/`, formData)
-        setVehiculos(vehiculos.map((v) => (v.placa === editingVehiculo.placa ? formData : v)))
+        await updateVehicle.mutateAsync({ placa: formData.placa, data: formData })
       } else {
-        const response = await api.post("/vehiculos/", formData)
-        setVehiculos([...vehiculos, response.data])
+        await createVehicle.mutateAsync(formData)
       }
       closeModal()
     } catch (err) {
@@ -88,14 +66,18 @@ function VehicleMan() {
   const handleDelete = async (placa: string) => {
     if (!confirm(`¿Está seguro de que desea eliminar el vehículo ${placa}?`)) return
     try {
-      await api.delete(`/vehiculos/${placa}/`)
-      setVehiculos(vehiculos.filter((v) => v.placa !== placa))
+      await deleteVehicle.mutateAsync(placa)
     } catch (err) {
       console.error("Error deleting vehiculo:", err)
       alert("Error al eliminar el vehículo")
     }
   }
 
+  const handleFormChange = (field: "placa" | "tipo", value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  // Pure UI functions - passed to presentational components
   const getTipoLabel = (tipo: string) => {
     const tipos: Record<string, string> = {
       DOCENTE: "Docente",
@@ -116,6 +98,8 @@ function VehicleMan() {
     return colors[tipo] || "bg-muted text-muted-foreground"
   }
 
+  const displayError = error ? "No se pudieron cargar los vehículos" : ""
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -129,9 +113,9 @@ function VehicleMan() {
         </Button>
       </div>
 
-      {error && (
+      {displayError && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
-          {error}
+          {displayError}
         </div>
       )}
 
@@ -147,113 +131,23 @@ function VehicleMan() {
         </div>
       </div>
 
-      <Card className="border-border bg-card shadow-sm">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b bg-muted/50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Placa</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Tipo</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {loading ? (
-                  <tr>
-                    <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">
-                      Cargando...
-                    </td>
-                  </tr>
-                ) : filteredVehiculos.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">
-                      No se encontraron vehículos
-                    </td>
-                  </tr>
-                ) : (
-                  filteredVehiculos.map((vehiculo) => (
-                    <tr key={vehiculo.placa} className="hover:bg-muted/50">
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
-                          <Car className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-mono font-semibold text-foreground">{vehiculo.placa}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getTipoColor(vehiculo.tipo)}`}>
-                          {getTipoLabel(vehiculo.tipo)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => openModal(vehiculo)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(vehiculo.placa)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      <VehicleTable
+        vehiculos={filteredVehiculos}
+        loading={loading}
+        onEdit={openModal}
+        onDelete={handleDelete}
+        getTipoLabel={getTipoLabel}
+        getTipoColor={getTipoColor}
+      />
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-foreground">
-                {editingVehiculo ? "Editar Vehículo" : "Nuevo Vehículo"}
-              </h2>
-              <Button variant="ghost" size="icon" onClick={closeModal}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Placa</label>
-                <Input
-                  value={formData.placa}
-                  onChange={(e) => setFormData({ ...formData, placa: e.target.value.toUpperCase() })}
-                  placeholder="ABC-123"
-                  disabled={!!editingVehiculo}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Tipo</label>
-                <select
-                  value={formData.tipo}
-                  onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="DOCENTE">Docente</option>
-                  <option value="ESTUDIANTE">Estudiante</option>
-                  <option value="ADMINISTRATIVO">Administrativo</option>
-                  <option value="VISITANTE">Visitante</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={closeModal}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleSave}>
-                  <Check className="mr-2 h-4 w-4" />
-                  Guardar
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <VehicleFormModal
+        isOpen={showModal}
+        isEditing={!!editingVehiculo}
+        formData={formData}
+        onClose={closeModal}
+        onSubmit={handleSave}
+        onChange={handleFormChange}
+      />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-name: Proyecto Final ProWeb
+name: scavi-proweb
 services:
   api:
     build:
