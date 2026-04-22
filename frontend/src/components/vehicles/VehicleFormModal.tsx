@@ -14,6 +14,7 @@ interface VehicleFormModalProps {
   onClose: () => void
   onSubmit: () => void
   onChange: (field: keyof VehicleFormData, value: string) => void
+  saving?: boolean
 }
 
 export function VehicleFormModal({
@@ -23,6 +24,7 @@ export function VehicleFormModal({
   onClose,
   onSubmit,
   onChange,
+  saving = false,
 }: VehicleFormModalProps) {
   if (!isOpen) return null
 
@@ -67,9 +69,8 @@ export function VehicleFormModal({
             <Button variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button onClick={onSubmit}>
-              <Check className="mr-2 h-4 w-4" />
-              Guardar
+            <Button onClick={onSubmit} disabled={saving}>
+              {saving ? "Guardando..." : "Guardar"}
             </Button>
           </div>
         </div>

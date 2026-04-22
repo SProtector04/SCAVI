@@ -120,17 +120,30 @@ def process_image_pipeline(image_file, device_id=''):
                     'class': det.get('class_name', 'plate')
                 })
         else:
-            # Plate detector not available - return empty (no mock plates)
-            logger.warning("Plate detector not available - returning empty response")
+            # Plate detector not available - log and skip DB save
+            logger.warning("Plate detector not available - skipping detection")
             detections = []
+            temp_path = None
+    
+    # Skip DB save if no detections
+    if not detections:
+        logger.warning(f"Skipping DB save - no detections for device {device_id}")
+        return {
+            'event_id': None,
+            'detections': [],
+            'timestamp': None
+        }
     finally:
         # Cleanup temp file
-        if os.path.exists(temp_path):
+        if temp_path and os.path.exists(temp_path):
             os.unlink(temp_path)
     
     # Create detection event in database
     # Use first detection result
     primary_detection = detections[0] if detections else {'text': 'UNKNOWN', 'confidence': 0.0}
+    
+    # Reset file pointer in case it was consumed
+    image_file.seek(0)
     
     event = PlateDetection.objects.create(
         imagen=image_file,

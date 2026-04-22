@@ -20,7 +20,7 @@ class VehiculoSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Vehiculo
-        fields = '__all__'
+        fields = ['placa', 'tipo', 'tipos']
 
 
 class LogDeteccionSerializer(serializers.ModelSerializer):
@@ -37,11 +37,16 @@ class RegistroAccesoSerializer(serializers.ModelSerializer):
     Serializer for RegistroAcceso model.
     """
     logs_deteccion = LogDeteccionSerializer(many=True, read_only=True)
+    vehiculo_placa = serializers.CharField(source='vehiculo.placa', read_only=True, default='')
+    camara_nombre = serializers.CharField(source='camara.nombre', read_only=True, default='')
     
     class Meta:
         model = RegistroAcceso
-        fields = '__all__'
-        read_only_fields = ('fecha_hora','estado_acceso',)
+        fields = [
+            'id', 'vehiculo_placa', 'placa_detectada_ia', 'camara_nombre',
+            'fecha_hora', 'estado_acceso', 'confianza_ia', 'logs_deteccion'
+        ]
+        read_only_fields = ('fecha_hora', 'estado_acceso',)
 
 
 class ColaProcesamientoSerializer(serializers.ModelSerializer):

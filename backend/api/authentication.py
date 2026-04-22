@@ -4,6 +4,9 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 import hashlib
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -50,9 +53,6 @@ class JWTCookieAuthentication(JWTAuthentication):
         """
         Validates the provided token and returns the validated token instance.
         """
-        from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
-        from rest_framework_simplejwt.tokens import RefreshToken
-        
         # Use SimpleJWT's token validation
         return super().get_validated_token(raw_token)
 
@@ -80,6 +80,7 @@ class DeviceAPIKeyAuthentication:
         # For now, we check against an environment variable only
         dev_key = os.environ.get('DEVICE_API_KEY')
         if not dev_key:
+            logger.warning("DEVICE_API_KEY environment variable not configured")
             return None
 
         dev_key_hash = hashlib.sha256(dev_key.encode()).hexdigest()

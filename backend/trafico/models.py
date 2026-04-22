@@ -28,7 +28,8 @@ class TipoVehiculo(models.Model):
         unique_together = ['vehiculo', 'nombre']
 
     def __str__(self):
-        return f"{self.nombre} ({self.vehiculo.placa})"
+        vehiculo_placa = self.vehiculo.placa if self.vehiculo else "(sin vehículo)"
+        return f"{self.nombre} ({vehiculo_placa})"
 
 
 class Vehiculo(models.Model):
@@ -157,6 +158,9 @@ class Alerta(models.Model):
         ('ACCESO_SOSPECHOSO', 'Acceso sospechoso'),
         ('FALLA_CAMARA', 'Falla de cámara'),
         ('SISTEMA', 'Alerta del sistema'),
+        ('VEHICULO_NUEVO', 'Vehículo nuevo detectado'),
+        ('REINGRESO', 'Reingreso de vehículo'),
+        ('VEHICULO_NO_REGISTRADO', 'Vehículo no registrado'),
     )
     
     PRIORIDAD_ALERTA = (
