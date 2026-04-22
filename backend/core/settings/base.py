@@ -199,7 +199,7 @@ SIMPLE_JWT = {
 
 # ANPR Configuration
 # Path to the dedicated license plate detection model
-ANPR_PLATE_MODEL_PATH = os.environ.get('SCAVI_PLATE_MODEL_PATH', '')
+ANPR_PLATE_MODEL_PATH = os.environ.get('SCAVI_PLATE_MODEL_PATH', '/app/models/license_plate_detector.pt')
 
 # Configuración de Logging
 LOGGING = {

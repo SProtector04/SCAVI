@@ -33,7 +33,7 @@ def get_plate_model_path() -> str:
     Resolves the path in order:
     1. Django setting ANPR_PLATE_MODEL_PATH
     2. Environment variable SCAVI_PLATE_MODEL_PATH
-    3. Project root / license_plate_detector.pt
+    3. Project root / backend/models/license_plate_detector.pt
     4. /opt/models/license_plate_detector.pt (Docker)
     
     Returns:
@@ -54,7 +54,7 @@ def get_plate_model_path() -> str:
     
     # Try project root
     project_root = Path(__file__).resolve().parent.parent.parent.parent
-    model_path = project_root / 'license_plate_detector.pt'
+    model_path = project_root / 'backend' / 'models' / 'license_plate_detector.pt'
     if model_path.exists():
         return str(model_path)
     
@@ -64,7 +64,7 @@ def get_plate_model_path() -> str:
         return docker_path
     
     # Fallback to project root path
-    return str(project_root / 'license_plate_detector.pt')
+    return str(project_root / 'backend' / 'models' / 'license_plate_detector.pt')
 
 
 class PlateDetector:
