@@ -8,6 +8,7 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
 from PIL import Image
+from anpr.services.ocr_reader import OCRReader
 
 
 User = get_user_model()
@@ -71,3 +72,14 @@ class PlateDetectionApiTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['detections'], [])
+
+    def test_ocr_requires_plate_like_format(self):
+        reader = OCRReader.__new__(OCRReader)
+        self.assertEqual(
+            reader._extract_best_plate_candidate(['123ABC', 'WHEEL42', 'A1234']),
+            'WHEEL42'
+        )
+        self.assertEqual(
+            reader._extract_best_plate_candidate(['12345', 'WHEELS']),
+            'UNKNOWN'
+        )

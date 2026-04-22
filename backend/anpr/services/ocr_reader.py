@@ -126,17 +126,22 @@ class OCRReader:
         
         if not alphanumeric_tokens:
             return ""
+
+        def looks_like_plate(token: str) -> bool:
+            return bool(token) and token[0].isalpha() and any(c.isdigit() for c in token)
         
-        # Find longest alphanumeric token (license plates tend to be longer than random text)
-        # Also filter to reasonable plate length (4-10 characters typical)
-        valid_candidates = [t for t in alphanumeric_tokens if 4 <= len(t) <= 10]
-        
+        # Find longest alphanumeric token that looks like a plate.
+        # Plate must start with a letter and contain at least one number.
+        valid_candidates = [
+            t for t in alphanumeric_tokens
+            if 4 <= len(t) <= 10 and looks_like_plate(t)
+        ]
+
         if valid_candidates:
             # Return the longest valid candidate
             return max(valid_candidates, key=len)
-        
-        # Fallback: return longest alphanumeric token regardless of length
-        return max(alphanumeric_tokens, key=len)
+
+        return "UNKNOWN"
     
     def read_text(self, image_path: str, bbox: list = None) -> str:
         """
