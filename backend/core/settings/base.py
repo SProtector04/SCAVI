@@ -21,10 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY','iaowd&twl9dnu%$(5(r97-gmcw&!4idlk^d@7e4al&+blu1^!7')
+def env_bool(name: str, default: str = 'False') -> bool:
+    return os.environ.get(name, default).strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-only-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True')
+DEBUG = env_bool('DEBUG', 'True')
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'api']
 
@@ -147,7 +151,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'es-ni'
+LANGUAGE_CODE = 'es'
 
 TIME_ZONE = 'UTC'
 
@@ -159,7 +163,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (ANPR images)
 MEDIA_URL = 'media/'

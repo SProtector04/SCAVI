@@ -16,9 +16,6 @@ api.interceptors.request.use(
     const cookies = document.cookie.split('; ');
     const csrfToken = cookies.find(row => row.startsWith('csrftoken='))?.split('=')[1];
     
-    console.log('Cookies:', document.cookie);
-    console.log('CSRF Token:', csrfToken);
-    
     if (csrfToken) {
       config.headers['X-CSRFToken'] = csrfToken;
     }

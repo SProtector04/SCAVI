@@ -301,10 +301,14 @@ Infra/Compose/Nginx:
    - Settings dicen “Generated … using Django 5.2.11” (`backend/core/settings/base.py`).
    - `backend/requirements.txt` pinnea `Django==6.0.3`.
 4. `backend/requirements.txt` parece estar en un encoding inusual (UTF-16 LE con BOM `0xFF 0xFE`, se ven caracteres NUL al imprimirlo). Esto puede romper tooling en Windows/CI si asume UTF-8.
-5. Seguridad: `SECRET_KEY` tiene un valor default hardcodeado en settings (`backend/core/settings/base.py`). En producción esto debería venir por env sí o sí.
-6. `DEBUG` se lee como string (`os.environ.get('DEBUG', 'True')`) sin parsear a boolean; puede haber comportamiento inesperado según cómo se setee.
-7. `ALLOWED_HOSTS` en `production.py` incluye un string que parece un URL (YouTube). Probablemente es placeholder.
-8. Static con Nginx: `nginx.conf` hace `alias /app/static/`, pero el contenedor `nginx` no monta `/app` desde el backend. Además `backend/core/settings/base.py` no define `STATIC_ROOT` y `backend/Dockerfile` (target `production`) ejecuta `collectstatic`, que típicamente requiere `STATIC_ROOT`. Si se quiere servir `static/`, hay que:
+5. `SECRET_KEY` se maneja con fallback en base para desarrollo, pero producción debe seguir exigiéndola por env.
+6. `DEBUG` ahora se parsea como booleano en `backend/core/settings/base.py`; revisar cualquier lógica que todavía compare cadenas.
+7. `ALLOWED_HOSTS` en `production.py` ahora se toma desde env y ya no depende de placeholders.
+8. Static con Nginx: `nginx.conf` sirve `/static/` desde `/app/staticfiles/`, `backend/core/settings/base.py` define `STATIC_ROOT` y `docker-compose.yml` monta un volumen compartido. Si se quiere servir `static/`, la cadena ya está coherente.
+9. `package.json` en raíz contiene deps (`react-router-dom`, `tailwindcss`, etc.) pero el build real del frontend usa `frontend/package.json`. Puede ser un remanente.
+10. Frontend routing: hay `react-router-dom` en `package.json` raíz, pero el `frontend/src/App.tsx` resuelve páginas con `window.location.pathname` (no se ve uso de React Router). Si se quiere routing real, habrá que decidir estrategia.
+11. Compose arranca el backend con solo `migrate` en cada `up` (`docker-compose.yml`). Ya no genera migraciones accidentales, que era el problema anterior.
+12. Usuario custom: `AUTH_USER_MODEL = 'api.Usuario'` ya está configurado en `backend/core/settings/base.py`.
    - Montar un volumen compartido con `collectstatic`, o
    - Servir static desde Django/Gunicorn (no recomendado), o
    - Usar otro approach (CDN / object storage).
