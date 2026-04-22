@@ -200,8 +200,8 @@ re_path(r'ws/device/(?P<device_id>\w+)/$', DeviceEventConsumer.as_asgi()),
   - `JWTCookieAuthentication` (extiende `rest_framework_simplejwt.authentication.JWTAuthentication`)
     - Lee `access_token` desde `request.COOKIES['access_token']` y valida usando SimpleJWT.
     - Devuelve `(user, validated_token)`.
-  - `DeviceAPIKeyAuthentication`
-    - Lee header `X-Device-Key` (`HTTP_X_DEVICE_KEY`) y compara el hash SHA256 con un `dev_key` embebido (`'dev-device-key-12345'`) — si coincide devuelve un objeto `DeviceUser()` placeholder.
+   - `DeviceAPIKeyAuthentication`
+     - Lee header `X-Device-Key` (`HTTP_X_DEVICE_KEY`) y compara el hash SHA256 con `DEVICE_API_KEY` desde entorno — si coincide devuelve un objeto `DeviceUser()` placeholder.
     - `DeviceUser` tiene atributos: `username='device'`, `is_authenticated=True`, `rol='DEVICE'`.
 
   - Código relevante (extracto):
@@ -211,7 +211,9 @@ class DeviceAPIKeyAuthentication:
     def authenticate(self, request):
         api_key = request.META.get('HTTP_X_DEVICE_KEY')
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
-        dev_key = 'dev-device-key-12345'
+        dev_key = os.environ.get('DEVICE_API_KEY')
+        if not dev_key:
+            return None
         dev_key_hash = hashlib.sha256(dev_key.encode()).hexdigest()
         if key_hash == dev_key_hash:
             return (DeviceUser(), None)
@@ -256,7 +258,7 @@ class IsSupervisorOrAdmin(permissions.BasePermission):
 ## Observaciones y recomendaciones (rápidas)
 
 - Seguridad / producción:
-  - Hay una clave de desarrollo (`dev-device-key-12345`) embebida en `DeviceAPIKeyAuthentication` — debe eliminarse o moverse a variables de entorno en producción.
+  - `DeviceAPIKeyAuthentication` ahora depende de `DEVICE_API_KEY` en entorno; documentar ese requisito para despliegues y tests.
   - La lógica para decidir `is_prod` en `set_jwt_cookies` usa `os.environ.get('DEBUG', 'True') == 'False'` — es frágil/confusa y puede invertirse accidentalmente; recomiendo usar una variable explícita `ENV` o `DJANGO_SETTINGS_MODULE` o `DEBUG` convertido a boolean.
   - `JWTCookieAuthentication` depende de `access_token` en cookie; verificar que `channels`/WebSocket autentiquen el usuario en `scope` antes de confiar en `request.user` dentro de `connect()`.
 

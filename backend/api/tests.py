@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.test.utils import override_settings
 import json
+from unittest.mock import patch
 
 Usuario = get_user_model()
 
@@ -228,23 +229,25 @@ class TestDeviceAPIKey(APITestCase):
 
     def test_device_ingest_accepts_valid_api_key(self):
         """Device ingest should accept valid API key"""
-        response = self.client.post(
-            '/api/device/ingest/',
-            {'data': 'test'},
-            format='json',
-            HTTP_X_DEVICE_KEY='dev-device-key-12345'
-        )
+        with patch.dict('os.environ', {'DEVICE_API_KEY': 'dev-device-key-12345'}):
+            response = self.client.post(
+                '/api/device/ingest/',
+                {'data': 'test'},
+                format='json',
+                HTTP_X_DEVICE_KEY='dev-device-key-12345'
+            )
         # Should not be 401 (might be 400 for valid data, but not 401)
         self.assertIn(response.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED, status.HTTP_400_BAD_REQUEST])
 
     def test_device_ingest_rejects_invalid_api_key(self):
         """Device ingest should reject invalid API key"""
-        response = self.client.post(
-            '/api/device/ingest/',
-            {'data': 'test'},
-            format='json',
-            HTTP_X_DEVICE_KEY='invalid_key'
-        )
+        with patch.dict('os.environ', {'DEVICE_API_KEY': 'dev-device-key-12345'}):
+            response = self.client.post(
+                '/api/device/ingest/',
+                {'data': 'test'},
+                format='json',
+                HTTP_X_DEVICE_KEY='invalid_key'
+            )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 

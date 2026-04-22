@@ -3,6 +3,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken, AuthenticationFail
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 import hashlib
+import os
 
 User = get_user_model()
 
@@ -76,8 +77,11 @@ class DeviceAPIKeyAuthentication:
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
         
         # In production, this would query a Device model
-        # For now, we check against a simple environment variable or allow development keys
-        dev_key = 'dev-device-key-12345'
+        # For now, we check against an environment variable only
+        dev_key = os.environ.get('DEVICE_API_KEY')
+        if not dev_key:
+            return None
+
         dev_key_hash = hashlib.sha256(dev_key.encode()).hexdigest()
         
         if key_hash == dev_key_hash:
