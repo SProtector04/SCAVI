@@ -18,6 +18,7 @@ function VehicleMan() {
     placa: "",
     tipo: "DOCENTE",
   })
+  const [saving, setSaving] = useState(false)
 
   const filteredVehiculos = (vehiculos || []).filter((v) => {
     const search = searchTerm.toLowerCase()
@@ -50,16 +51,23 @@ function VehicleMan() {
   }
 
   const handleSave = async () => {
+    if (!formData.placa.trim()) {
+      alert("La placa es obligatoria")
+      return
+    }
+    setSaving(true)
     try {
       if (editingVehiculo) {
-        await updateVehicle.mutateAsync({ placa: formData.placa, data: formData })
+        await updateVehicle.mutateAsync({ placa: editingVehiculo.placa, data: formData })
       } else {
         await createVehicle.mutateAsync(formData)
       }
-      closeModal()
+      setShowModal(false)
     } catch (err) {
       console.error("Error saving vehiculo:", err)
       alert("Error al guardar el vehículo")
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -140,9 +148,10 @@ function VehicleMan() {
         isOpen={showModal}
         isEditing={!!editingVehiculo}
         formData={formData}
-        onClose={closeModal}
+        onClose={() => setShowModal(false)}
         onSubmit={handleSave}
         onChange={handleFormChange}
+        saving={saving}
       />
     </div>
   )

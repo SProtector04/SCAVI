@@ -5,15 +5,15 @@ Views for plate detection, event listing, and statistics.
 """
 import logging
 from datetime import datetime, timedelta
+from django.utils import timezone
+from django.db.models import Count, Avg
+from django.db.models.functions import TruncDate
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
-
-from django.db.models import Count, Avg
-from django.utils import timezone
 
 from .models import PlateDetection
 from .serializers import (
@@ -22,8 +22,114 @@ from .serializers import (
     PlateDetectionStatsSerializer,
 )
 from api.permissions import IsAdmin, IsSupervisorOrAdmin
+from trafico.models import Vehiculo, RegistroAcceso, Alerta
 
 logger = logging.getLogger(__name__)
+
+
+def normalize_plate(text: str) -> str:
+    """
+    Normaliza una placa: mayúsculas, sin espacios ni guiones.
+    Ej: "ABC 123" → "ABC123", "ABC-123" → "ABC123"
+    """
+    return ''.join(c for c in text.upper().strip() if c.isalnum())
+
+
+def classify_vehicle_entry(placa_texto: str) -> tuple[str, str, str]:
+    """
+    Clasifica el tipo de ingreso de un vehículo según su placa.
+    Si la placa no existe, la registra automáticamente como VISITANTE.
+
+    Args:
+        placa_texto: Texto de la placa detectada
+
+    Returns:
+        Tuple de (tipo_alerta, titulo, descripcion)
+        - tipo_alerta: VEHICULO_NUEVO | REINGRESO | VEHICULO_NO_REGISTRADO
+        - titulo: Título de la alerta
+        - descripcion: Descripción del evento
+    """
+    placa_normalizada = normalize_plate(placa_texto)
+
+    if not placa_normalizada or placa_normalizada in ('UNKNOWN', 'OCRERROR', 'OCRUNAVAILABLE'):
+        return ('', '', '')
+
+    vehiculo, created = Vehiculo.objects.get_or_create(
+        placa=placa_normalizada,
+        defaults={'tipo': 'VISITANTE'}
+    )
+
+    if created:
+        return (
+            'VEHICULO_NUEVO',
+            f'Vehículo registrado: {placa_normalizada}',
+            f'El vehículo {placa_normalizada} fue registrado automáticamente como visitante.'
+        )
+
+    today = timezone.now().date()
+    today_start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+
+    ha_pasado_hoy = RegistroAcceso.objects.filter(
+        vehiculo=vehiculo,
+        fecha_hora__gte=today_start
+    ).exists()
+
+    if ha_pasado_hoy:
+        return (
+            'REINGRESO',
+            f'Reingreso: {placa_normalizada}',
+            f'El vehículo {placa_normalizada} ({vehiculo.tipo}) registró un nuevo ingreso.'
+        )
+
+    return (
+        'VEHICULO_NUEVO',
+        f'Vehículo nuevo: {placa_normalizada}',
+        f'Primera detección del vehículo {placa_normalizada} ({vehiculo.tipo}) hoy.'
+    )
+
+
+def create_alerta_from_detection(
+    placa_texto: str,
+    registro_acceso=None,
+    confianza: float = 0.0
+) -> Alerta:
+    """
+    Crea una alerta basada en la detección de placa.
+
+    Args:
+        placa_texto: Texto de la placa
+        registro_acceso: Registro de acceso relacionado (opcional)
+        confianza: Nivel de confianza de la detección
+
+    Returns:
+        Alerta creada o None si no aplica
+    """
+    tipo_alerta, titulo, descripcion = classify_vehicle_entry(placa_texto)
+
+    if not tipo_alerta:
+        return None
+
+    prioridad = 'ALTA'
+    if tipo_alerta == 'VEHICULO_NUEVO':
+        prioridad = 'MEDIA'
+    elif tipo_alerta == 'REINGRESO':
+        prioridad = 'BAJA'
+
+    if confianza < 0.5:
+        prioridad = 'CRITICA'
+
+    placa_normalizada = normalize_plate(placa_texto)
+
+    alerta = Alerta.objects.create(
+        tipo=tipo_alerta,
+        prioridad=prioridad,
+        titulo=titulo,
+        descripcion=descripcion,
+        registro=registro_acceso,
+    )
+
+    logger.info(f"Alerta creada: {tipo_alerta} - {placa_normalizada}")
+    return alerta
 
 
 class PlateDetectionViewSet(viewsets.ModelViewSet):
@@ -184,6 +290,33 @@ class PlateDetectionViewSet(viewsets.ModelViewSet):
             is_active=True
         )
 
+        tipo_alerta, titulo_alerta, _ = classify_vehicle_entry(plate_text)
+
+        if tipo_alerta:
+            create_alerta_from_detection(plate_text, None, confidence)
+
+        from trafico.models import RegistroAcceso, Vehiculo
+
+        placa_normalizada = normalize_plate(plate_text)
+        vehiculo_obj = None
+        estado = 'DESCONOCIDO'
+
+        if placa_normalizada and placa_normalizada not in ('UNKNOWN', 'OCRERROR', 'OCRUNAVAILABLE'):
+            try:
+                vehiculo_obj = Vehiculo.objects.get(placa=placa_normalizada)
+                estado = 'AUTORIZADO'
+            except Vehiculo.DoesNotExist:
+                estado = 'DESCONOCIDO'
+
+        RegistroAcceso.objects.create(
+            placa_detectada_ia=plate_text,
+            vehiculo=vehiculo_obj,
+            estado_acceso=estado,
+            confianza_ia=confidence,
+        )
+
+        logger.info(f"RegistroAcceso creado: {placa_normalizada} - {estado}")
+
         try:
             from channels.layers import get_channel_layer
             from asgiref.sync import async_to_sync
@@ -200,6 +333,8 @@ class PlateDetectionViewSet(viewsets.ModelViewSet):
                                 "registro_id": event.id,
                                 "camara": device_id or "WEB_UPLOAD",
                                 "confianza": confidence,
+                                "alerta_tipo": tipo_alerta,
+                                "alerta_titulo": titulo_alerta,
                                 "bbox": primary.get("bbox") if 'primary' in locals() else None
                             }
                         }
