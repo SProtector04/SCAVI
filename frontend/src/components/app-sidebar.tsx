@@ -14,7 +14,6 @@ import {
 import {
   LayoutDashboard,
   Users,
-  UserCheck,
   Car,
   History as HistoryIcon,
   LogOut,
@@ -56,8 +55,6 @@ const navigationItems = [
   },
 ];
 
-
-
 export function AppSidebar() {
   const { setOpen, setOpenMobile } = useSidebar();
 
@@ -65,6 +62,22 @@ export function AppSidebar() {
     setOpen(false);
     setOpenMobile(false);
   };
+
+  // Leer usuario desde localStorage en cada renderizado (react-friendly)
+  let userRol: string | null = null;
+  try {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      userRol = user.rol || null;
+    }
+  } catch {
+    userRol = null;
+  }
+
+  // Filtrar items según el rol dinámicamente
+  const filteredNavigationItems =
+    userRol === "ADMIN" ? navigationItems : navigationItems.filter((item) => item.title !== "Usuarios");
 
   return (
     <Sidebar className="bg-white">
@@ -87,7 +100,8 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navegacion</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => (
+              {/* Tarea 1.3: Mapear filteredNavigationItems en lugar de navigationItems */}
+              {filteredNavigationItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
                     <a

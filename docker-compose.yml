@@ -23,6 +23,7 @@ services:
     env_file: .env
     volumes:
       - ./backend:/app
+      - ./backend/models/license_plate_detector.pt:/app/models/license_plate_detector.pt:ro
     # Ejecuta el comando en background. 0 es para cámaras USB pasadas al docker (difícil sin devices), 
     # pero aquí podemos configurar un RTSP por defecto o hacer que el script lea la BD luego.
     command: >
@@ -45,6 +46,7 @@ services:
     env_file: .env
     volumes:
       - ./backend:/app
+      - ./backend/models/license_plate_detector.pt:/app/models/license_plate_detector.pt:ro
     command: >
       sh -c "python manage.py makemigrations --noinput &&
             python manage.py migrate --noinput &&
