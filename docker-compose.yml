@@ -82,17 +82,26 @@ services:
       - frontend
     depends_on:
       - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   db:
     image: postgres:15-alpine
     restart: unless-stopped
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./backend/init-db.sh:/docker-entrypoint-initdb.d/init.sh:ro
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-      POSTGRES_INITDB_ARGS: --encoding=UTF-8
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8 --auth-host=md5
     networks:
       - backend
     healthcheck:
@@ -111,6 +120,12 @@ services:
       - static_volume:/app/staticfiles:ro
     networks:
       - frontend
+    depends_on:
+      web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    command: sh -c "sleep 3 && nginx -g 'daemon off;'"
 
 networks:
   frontend:
