@@ -22,11 +22,57 @@ function WebcamCapture() {
   const [error, setError] = useState<string | null>(null)
   const [streamActive, setStreamActive] = useState(false)
 
+  const getCameraErrorMessage = (err: unknown) => {
+    const name = err && typeof err === "object" && "name" in err ? String((err as { name?: string }).name) : ""
+
+    switch (name) {
+      case "NotAllowedError":
+      case "PermissionDeniedError":
+        return "El navegador bloqueó la cámara. Acepta el permiso o revisa la configuración del sitio."
+      case "NotFoundError":
+        return "No se encontró ninguna cámara disponible en este equipo."
+      case "NotReadableError":
+        return "La cámara está ocupada o no pudo abrirse. Cierra otras apps que la estén usando."
+      case "OverconstrainedError":
+        return "La cámara disponible no cumple con las restricciones solicitadas."
+      case "SecurityError":
+        return "La cámara solo funciona en HTTPS o localhost."
+      default:
+        return "No se pudo acceder a la cámara. Verifica HTTPS, permisos y que exista un dispositivo disponible."
+    }
+  }
+
   const startCamera = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: 640, height: 480 }
-      })
+      if (!window.isSecureContext) {
+        setError("La cámara solo funciona en HTTPS o localhost.")
+        return
+      }
+
+      const constraints = [
+        {
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+          },
+        },
+        { video: true },
+      ] as const
+
+      let stream: MediaStream | null = null
+      for (const config of constraints) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(config)
+          break
+        } catch {
+          continue
+        }
+      }
+
+      if (!stream) {
+        throw new Error("No camera stream available")
+      }
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream
@@ -36,7 +82,7 @@ function WebcamCapture() {
       }
     } catch (err) {
       console.error("Error accessing camera:", err)
-      setError("No se pudo acceder a la cámara. Verifica los permisos.")
+      setError(getCameraErrorMessage(err))
     }
   }, [])
 
