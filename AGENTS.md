@@ -6,9 +6,9 @@
 docker compose up --build
 ```
 
-Services: `web:5173` (frontend), `api:8000` (Django), `db:5432` (PostgreSQL), `nginx:80`, `redis:6379`, `yolo-engine`.
+Services: `web:5173` (frontend), `api:8000` (Django), `db:5432` (PostgreSQL), `nginx:80`, `redis:6379`, `yolo-engine` (ANPR camera stream).
 
-**Required env file**: `.env` defines `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DEBUG`, `NODE_ENV`.
+**Required env file**: `.env` must define `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DEBUG`, `NODE_ENV`.
 
 ## Key commands
 
@@ -33,6 +33,7 @@ Services: `web:5173` (frontend), `api:8000` (Django), `db:5432` (PostgreSQL), `n
 - WebSocket via Channels (InMemoryChannelLayer in dev, not Redis)
 - ANPR module: YOLO detection + OCR in `backend/anpr/`
 - Django settings: `backend/core/settings/base.py`
+- `yolo-engine` service: Runs camera stream processor (auto-starts with container)
 
 ## Tech stack
 
@@ -48,3 +49,4 @@ Services: `web:5173` (frontend), `api:8000` (Django), `db:5432` (PostgreSQL), `n
 - **JWT**: Tokens in httpOnly cookies; access lifetime 15 minutes, refresh 7 days
 - **Static/Media**: Django serves media at `/media/` (ANPR uploads); static at `/static/`
 - **ANPR model**: Points to `/app/models/license_plate_detector.pt`
+- **Dev ports**: `127.0.0.1:8000` (api), `127.0.0.1:5173` (web) - localhost only
