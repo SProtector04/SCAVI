@@ -25,12 +25,20 @@ def env_bool(name: str, default: str = 'False') -> bool:
     return os.environ.get(name, default).strip().lower() in {'1', 'true', 'yes', 'on'}
 
 
+def env_list(name: str, default: str) -> list[str]:
+    value = os.environ.get(name, default)
+    return [item.strip() for item in value.split(',') if item.strip()]
+
+
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-only-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env_bool('DEBUG', 'True')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'api']
+ALLOWED_HOSTS = env_list(
+    'ALLOWED_HOSTS',
+    'localhost,127.0.0.1,0.0.0.0,api,10.104.99.123'
+)
 
 # CORS settings for development
 CORS_ALLOWED_ORIGINS = [
@@ -38,6 +46,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost",
     "http://127.0.0.1:5173",
     "http://127.0.0.1",
+    "https://10.104.99.123",
+    "http://10.104.99.123",
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
@@ -52,6 +62,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://127.0.0.1:80",
     "http://127.0.0.1",
+    "https://10.104.99.123",
+    "http://10.104.99.123",
 ]
 
 # Application definition
@@ -112,6 +124,9 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     }
 }
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 
 
 # Database

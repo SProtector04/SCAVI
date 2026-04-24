@@ -104,6 +104,7 @@ docker-compose.override.yml
 *.cer
 ssl/
 certs/
+!certs/README.md
 
 # Archivos de Secrets Manager (si se usa Vault, AWS Secrets, etc.)
 secrets.json
