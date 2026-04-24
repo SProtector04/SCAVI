@@ -6,47 +6,52 @@
 docker compose up --build
 ```
 
-Services: `web:5173` (frontend), `api:8000` (Django), `db:5432` (PostgreSQL), `nginx:80`, `redis:6379`, `yolo-engine` (ANPR camera stream).
+Services: `web:5173`, `api:8000`, `db:5432`, `nginx:80`, `redis:6379`, `yolo-engine`.
 
-**Required env file**: `.env` must define `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DEBUG`, `NODE_ENV`.
+**Required**: `.env` with `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DEBUG`, `NODE_ENV`
 
 ## Key commands
 
-- **Backend migrations**: Auto-run on container start. Manual: `docker compose exec api python manage.py makemigrations && python manage.py migrate`
+- **Run single test**: `docker compose exec api python manage.py test api.tests.SomeTestCase.test_method --verbosity=2`
+- **Backend migrations**: `docker compose exec api python manage.py makemigrations && python manage.py migrate`
 - **Backend tests**: `docker compose exec api python manage.py test api.tests trafico.tests infraestructura.tests --verbosity=2`
-- **Integrity check**: `./verify_stack.sh` (Linux/Mac) or PowerShell equivalent
-- **Frontend build**: `cd frontend && npm run build`
 - **Frontend lint**: `cd frontend && npm run lint`
 - **Frontend typecheck**: `cd frontend && npx tsc --noEmit`
+- **Frontend build**: `cd frontend && npm run build`
+- **Integrity check**: `./verify_stack.sh`
 
 ## API structure
 
 - Base URL: `/api/`
-- JWT in httpOnly cookies (not Authorization headers)
-- 401 interceptor redirects to `/login` (except on `/auth/me/`)
+- JWT in httpOnly cookies (NOT Authorization headers)
 - Custom user model: `api.Usuario`
 - REST Framework: closed-by-default (all endpoints require authentication)
+- 401 interceptor redirects to `/login` (except `/auth/me/`)
 
 ## Architecture
 
-- Nginx reverse proxy routes `/` to frontend, `/api/` and `/admin/` to Django
-- WebSocket via Channels (InMemoryChannelLayer in dev, not Redis)
-- ANPR module: YOLO detection + OCR in `backend/anpr/`
-- Django settings: `backend/core/settings/base.py`
-- `yolo-engine` service: Runs camera stream processor (auto-starts with container)
+- Nginx: `/` → web, `/api/` + `/admin/` → api, `/ws/` → api
+- WebSocket via Channels (InMemoryChannelLayer in dev)
+- ANPR: YOLO detection + OCR in `backend/anpr/`, model at `/app/models/license_plate_detector.pt`
+- `yolo-engine` service: runs camera stream processor
 
 ## Tech stack
 
 - Backend: Django 5.2, DRF, PostgreSQL, Channels
-- Frontend: React 19, Vite, TypeScript, Tailwind CSS 3
-- Docker multi-stage builds (dev/prod targets via `NODE_ENV`)
+- Frontend: React 19, Vite 7.3.1, TypeScript ~5.9.3, Tailwind CSS 3.4
+- Docker multi-stage builds via `NODE_ENV`
 
 ## Important notes
 
-- **Redis**: Present in compose but unused (dev uses InMemoryChannelLayer)
-- **CORS**: Requires `X-CSRFToken` header on requests with credentials; CSRF cookie readable by JS
+- **Redis**: present but unused (dev uses InMemoryChannelLayer)
+- **CORS**: requires `X-CSRFToken` header with credentials; CSRF cookie readable by JS
 - **Language**: `LANGUAGE_CODE = 'es'`
-- **JWT**: Tokens in httpOnly cookies; access lifetime 15 minutes, refresh 7 days
-- **Static/Media**: Django serves media at `/media/` (ANPR uploads); static at `/static/`
-- **ANPR model**: Points to `/app/models/license_plate_detector.pt`
+- **JWT**: access lifetime 15 min, refresh 7 days
 - **Dev ports**: `127.0.0.1:8000` (api), `127.0.0.1:5173` (web) - localhost only
+- Django serves media at `/media/` (ANPR uploads), static at `/static/`
+
+## Git workflow
+
+- Branch naming: `feature/<name>`, `bugfix/<name>`, `hotfix/<name>`, `release/<version>`
+- Base branch: `develop` for features, `main` for hotfixes
+- Use Conventional Commits: `feat(area): message`, `fix(area): message`, etc.
