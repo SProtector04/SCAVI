@@ -1,4 +1,4 @@
-# Convenciones de Git para el proyecto Ambrossia
+# Convenciones de Git para el proyecto SCAVI
 
 ## Branches
 
@@ -108,7 +108,7 @@ git merge --no-ff hotfix/nombre
 
 - Antes de hacer PR, asegúrate de `pull --rebase` para evitar conflictos.
 - Utilizar reviewers en Pull Requests.
-- Evitar commits que rompan la compilación del proyecto (Django y Next.js deben correr localmente).
+- Evitar commits que rompan la ejecución del proyecto (backend Django y frontend Vite/React deben correr localmente).
 - Mantener PRs pequeños y enfocados en una sola feature o bugfix.
 
 ## Migraciones

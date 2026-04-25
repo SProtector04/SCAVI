@@ -14,13 +14,12 @@ import {
 import {
   LayoutDashboard,
   Users,
-  UserCheck,
   Car,
   History as HistoryIcon,
-  Mail,
-  Settings,
   LogOut,
   User,
+  Bell,
+  Camera,
 } from "lucide-react";
 
 const navigationItems = [
@@ -35,11 +34,6 @@ const navigationItems = [
     icon: Users,
   },
   {
-    title: "Gestion de usuarios",
-    url: "/users-management",
-    icon: UserCheck,
-  },
-  {
     title: "Gestion de vehiculos",
     url: "/vehicle-management",
     icon: Car,
@@ -50,17 +44,14 @@ const navigationItems = [
     icon: HistoryIcon,
   },
   {
-    title: "Contacto",
-    url: "/contact-us",
-    icon: Mail,
+    title: "Alertas",
+    url: "/alerts",
+    icon: Bell,
   },
-];
-
-const settingsItems = [
   {
-    title: "Configuracion",
-    url: "/settings",
-    icon: Settings,
+    title: "Cámara ANPR",
+    url: "/camera",
+    icon: Camera,
   },
 ];
 
@@ -71,6 +62,22 @@ export function AppSidebar() {
     setOpen(false);
     setOpenMobile(false);
   };
+
+  // Leer usuario desde localStorage en cada renderizado (react-friendly)
+  let userRol: string | null = null;
+  try {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      userRol = user.rol || null;
+    }
+  } catch {
+    userRol = null;
+  }
+
+  // Filtrar items según el rol dinámicamente
+  const filteredNavigationItems =
+    userRol === "ADMIN" ? navigationItems : navigationItems.filter((item) => item.title !== "Usuarios");
 
   return (
     <Sidebar className="bg-white">
@@ -93,7 +100,8 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navegacion</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => (
+              {/* Tarea 1.3: Mapear filteredNavigationItems en lugar de navigationItems */}
+              {filteredNavigationItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
                     <a
@@ -111,27 +119,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Ajustes</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild>
-                    <a
-                      href={item.url}
-                      className="flex items-center gap-3"
-                      onClick={handleNavigate}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        
       </SidebarContent>
 
       <SidebarFooter className="border-t pt-4">
@@ -150,7 +138,10 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <button className="flex items-center gap-3 w-full justify-start text-red-600 hover:text-red-700">
+              <button 
+                onClick={() => window.logout?.()}
+                className="flex items-center gap-3 w-full justify-start text-red-600 hover:text-red-700"
+              >
                 <LogOut className="h-4 w-4" />
                 <span>Cerrar sesion</span>
               </button>

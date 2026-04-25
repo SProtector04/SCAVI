@@ -13,4 +13,20 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  preview: {
+    host: true,
+    port: 5173,
+    strictPort: true,
+  },
+  server: {
+    host: true,
+    port: 5173,
+    strictPort: true,
+    proxy: {
+      "/api": {
+        target: "http://api:8000",
+        changeOrigin: true,
+      },
+    },
+  },
 });

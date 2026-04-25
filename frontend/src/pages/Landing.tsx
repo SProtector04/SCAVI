@@ -1,63 +1,151 @@
-import InfoCard from "../components/InfoCard";
-import FormLanding from "../components/FormLanding";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Shield, AlertTriangle, Settings, Car, Menu, X } from "lucide-react"
+import { Link } from "react-router-dom"
 
-const Landing = () => {
+function Landing() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const benefits = [
+    {
+      icon: Shield,
+      title: "Seguridad Reforzada",
+      desc: "Control automatizado de acceso con reconocimiento de placas vehiculares y verificación en tiempo real contra la base de datos institucional.",
+    },
+    {
+      icon: AlertTriangle,
+      title: "Reducción de Errores",
+      desc: "Elimina el factor de error humano en la verificación de acceso. Sistema automatizado con precisión superior al 98% en reconocimiento.",
+    },
+    {
+      icon: Settings,
+      title: "Optimización Operativa",
+      desc: "Reduce tiempos de espera en puntos de acceso y optimiza la asignación de personal de seguridad con automatización inteligente.",
+    },
+  ]
+
   return (
-    <div>
-      <header className="bg-white m-0 font-bold text-green-800 text-xl p-4 pl-6 border border-green-800">
-        SCAVI
+    <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-800">
+              <Car className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-bold text-foreground">SCAVI</span>
+          </div>
+
+          <nav className="hidden items-center gap-8 md:flex">
+            <a href="#beneficios" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+              Beneficios
+            </a>
+            <Link
+              to="/login"
+              className="rounded-md bg-green-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
+            >
+              Iniciar Sesión
+            </Link>
+          </nav>
+
+          <button
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+
+        {mobileMenuOpen && (
+          <div className="border-t border-border bg-card px-4 py-4 md:hidden">
+            <nav className="flex flex-col gap-4">
+              <a href="#beneficios" className="text-sm font-medium text-muted-foreground">
+                Beneficios
+              </a>
+              <Link
+                to="/login"
+                className="rounded-md bg-green-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
+              >
+                Iniciar Sesión
+              </Link>
+            </nav>
+          </div>
+        )}
       </header>
-      <div className="min-h-screen bg-[#f7f7f7] px-4 py-6 text-center md:px-8">
-        <div className="mx-auto w-full max-w-6xl">
-          <h2 className="mx-auto my-6 rounded-full border border-green-800 bg-white p-2 text-center shadow-sm text-green-900 font-small">
-            Universidad Tecnológica La Salle
-          </h2>
-          <h1 className="mx-auto my-6 w-full max-w-4xl text-3xl font-extrabold leading-tight md:my-10 md:text-5xl">
+
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-muted/50 to-background px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-36">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm text-muted-foreground">
+            <Car className="h-4 w-4 text-green-800" />
+            <span>Universidad Tecnológica La Salle</span>
+          </div>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
             Sistema de Control de Acceso Vehicular Institucional
           </h1>
-          <p className="mx-auto my-6 max-w-3xl text-base text-slate-700 md:my-8 md:text-lg">
-            Automatiza y optimiza el control de acceso vehicular en tu
-            institución con tecnología de reconocimiento de placas, monitoreo en
-            tiempo real y gestión centralizada de usuarios.
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+            Automatiza y optimiza el control de acceso vehicular en tu institución con tecnología de
+            reconocimiento de placas, monitoreo en tiempo real y gestión centralizada de usuarios.
           </p>
-          <div className="mx-auto my-6 grid w-full max-w-xl grid-cols-1 gap-3 md:my-8 md:grid-cols-2">
-            <button className="w-full rounded bg-green-800 py-2 font-bold text-white shadow-md hover:bg-green-700">
-              Ingresar al Sistema
-            </button>
-            <button className="w-full rounded border border-green-800 py-2 font-bold text-green-800 shadow-md hover:bg-[#f0f9f6]">
-              Más Información
-            </button>
-          </div>
-
-          <h1 className="mx-auto my-6 w-full max-w-3xl text-3xl font-bold md:my-12 md:text-4xl">
-            Registra tu vehículo
-          </h1>
-          <FormLanding />
-          <h1 className="mx-auto my-6 w-full max-w-3xl text-3xl font-bold md:my-12 md:text-4xl">
-            Información de Contacto
-          </h1>
-          <div className="grid grid-cols-1 gap-6 justify-items-center md:grid-cols-2 lg:grid-cols-3">
-            <InfoCard
-              icon={<Mail size={32} />}
-              title="Correo (Proximamente)"
-              value="scavi@ulsa.edu.ni"
-            />
-            <InfoCard
-              icon={<MapPin size={32} />}
-              title="Direccion"
-              value="Universidad Tecnológica La Salle, Leon, Nicaragua"
-            />
-            <InfoCard
-              icon={<Phone size={32} />}
-              title="Numero de Contacto (Proximamente)"
-              value="0000-0000"
-            />
+          <div className="mt-10">
+            <Link
+              to="/login"
+              className="inline-flex rounded-lg bg-green-800 px-8 py-3 text-lg font-medium text-white transition-colors hover:bg-green-700"
+            >
+              Iniciar Sesión
+            </Link>
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
+      </section>
 
-export default Landing;
+      {/* Benefits */}
+      <section id="beneficios" className="bg-background px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Beneficios Clave</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Transforma la gestión de acceso vehicular en tu institución
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {benefits.map((benefit, i) => {
+              const Icon = benefit.icon
+              return (
+                <Card key={i} className="border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+                  <CardContent className="flex flex-col items-center p-8 text-center">
+                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-green-800/10">
+                      <Icon className="h-7 w-7 text-green-800" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">{benefit.title}</h3>
+                    <p className="mt-3 leading-relaxed text-muted-foreground">{benefit.desc}</p>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border bg-card px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-800">
+                <Car className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-lg font-bold text-foreground">SCAVI</span>
+            </div>
+            <p className="text-center text-sm text-muted-foreground">
+              © 2026 SCAVI - Universidad Tecnológica La Salle. Todos los derechos reservados.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+export default Landing
